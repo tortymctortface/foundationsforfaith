@@ -1,0 +1,13 @@
+package com.edee.foundationsforfaith.enums;
+
+public enum ProgressStatus {
+    FUND_RAISING,
+    FUNDING_ACHIEVED,
+    SEARCHING_FOR_SITE,
+    SITE_PURCHASED,
+    BUILD_START_SCHEDULED,
+    BUILD_IN_PROGRESS,
+    EXTERIOR_BUILD_COMPLETE,
+    FURNISHING_IN_PROGRESS,
+    BUILD_COMPLETE
+}
