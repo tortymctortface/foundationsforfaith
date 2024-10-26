@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
-public class BuildingsController {
+public class ProjectController {
 
-    @GetMapping("/buildings")
+    @GetMapping("/projects")
     public ResponseEntity<String> allMovies(){
-        return new ResponseEntity<String>("All Buildings", HttpStatus.OK);
+        return new ResponseEntity<String>("All Projects", HttpStatus.OK);
     }
 
 }
