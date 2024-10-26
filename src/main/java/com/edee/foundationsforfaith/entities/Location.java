@@ -19,7 +19,7 @@ public class Location {
     @Id
     private ObjectId locationId;
 
-    private String countryCode;
+    private String country;
 
     private String areaName;
 
