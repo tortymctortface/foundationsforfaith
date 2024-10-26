@@ -24,6 +24,6 @@ public class Location {
     private String areaName;
 
     @DocumentReference
-    private List<Building> buildingIds;
+    private List<Project> projectIds;
 
 }
