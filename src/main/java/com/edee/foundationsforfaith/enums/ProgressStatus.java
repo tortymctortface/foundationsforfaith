@@ -1,6 +1,7 @@
 package com.edee.foundationsforfaith.enums;
 
 public enum ProgressStatus {
+    NEW_PROJECT,
     FUND_RAISING,
     FUNDING_ACHIEVED,
     SEARCHING_FOR_SITE,
