@@ -1,5 +1,6 @@
 package com.edee.foundationsforfaith.entities;
 
+import com.edee.foundationsforfaith.enums.BuildingType;
 import com.edee.foundationsforfaith.enums.ProgressStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,7 +24,11 @@ public class Project {
 
     private String projectName;
 
-    private String buildingType;
+    private String projectDescription;
+
+    private LocalDate projectCreatedDate;
+
+    private BuildingType buildingType;
 
     private ProgressStatus projectStatus;
 
@@ -31,11 +36,14 @@ public class Project {
 
     private boolean fullyFunded;
 
-    private LocalDate projectStartDate;
+    private LocalDate projectBuildStartDate;
 
     private boolean completed;
 
     @DocumentReference
     private List<Stone> stoneIds;
+
+    @DocumentReference
+    private List<ProjectUpdates> projectUpdates;
 
 }

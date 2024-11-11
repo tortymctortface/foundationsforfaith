@@ -15,6 +15,13 @@ public class LocationServiceImpl implements LocationService{
 //    @Autowired
 //    private MongoTemplate mongoTemplate;
 
+//    public Location createLocationWithProjects (String country, String area){
+//        Location location = new Location();
+//        location.setCountry(country);
+//        location.setAreaName(area);
+//        return locationRepository.insert(location);
+//    }
+
     public Location createLocation (String country, String area){
         Location location = new Location();
         location.setCountry(country);
