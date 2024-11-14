@@ -38,11 +38,10 @@ public class ProjectController {
     }
 
     @PostMapping("/create/project")
-    public ResponseEntity<Project> createNewLocation (NewProjectDto newProjectDto){
+    public ResponseEntity<Project> createNewProject (@RequestBody NewProjectDto newProjectDto){
         String safeCountry = Jsoup.clean(newProjectDto.getCountry(), Safelist.basic());
         String safeArea = Jsoup.clean(newProjectDto.getArea(), Safelist.basic());
-        Location location = locationService.createLocation(safeCountry,safeArea);
-        return new ResponseEntity<Project>((projectService.createProject(location.getLocationId(), newProjectDto)), HttpStatus.CREATED);
+        return new ResponseEntity<Project>(projectService.createProject(newProjectDto), HttpStatus.CREATED);
     }
 
 }

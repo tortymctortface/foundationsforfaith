@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -19,6 +20,16 @@ public class LocationController {
 
     @Autowired
     LocationService locationService;
+
+    @GetMapping("/locations")
+    public ResponseEntity<List<Location>> allLocations(){
+        return new ResponseEntity<List<Location>>(locationService.getAllLocations(), HttpStatus.OK);
+    }
+
+    @GetMapping("/locations/{country}")
+    public ResponseEntity<Optional<List<Location>>> allLocations(@PathVariable String country){
+        return new ResponseEntity<Optional<List<Location>>>(locationService.getLocationsByCountry(country), HttpStatus.OK);
+    }
 
     @PostMapping("/location/{country}/{area}")
     public ResponseEntity<Location> createNewLocation (@PathVariable String country, @PathVariable String area){

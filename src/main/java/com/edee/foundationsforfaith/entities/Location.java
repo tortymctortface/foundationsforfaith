@@ -21,7 +21,7 @@ public class Location {
 
     private String country;
 
-    private String areaName;
+    private String area;
 
     @DocumentReference
     private List<Project> projectIds;
