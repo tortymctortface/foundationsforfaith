@@ -5,7 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.util.List;
 
 @Document(collection = "stones")
 @Data
@@ -14,12 +19,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Stone {
 
     @Id
+    @Field("description")
     private ObjectId stoneId;
 
+    @Field("email")
+    @Indexed(unique = true)
+    private String email;
+
+    @Field("donor_name")
     private String donorName;
 
-    private String donorMessage;
+    @Field("send_updates_to_donor")
+    private Boolean sendUpdatesToDonor;
 
-    private String donationAmount;
+    @Field("donation_ids")
+    @DocumentReference
+    private List<Donation> donationIds;
 
 }

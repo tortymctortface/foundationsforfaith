@@ -21,19 +21,24 @@ public class LocationServiceImpl implements LocationService{
         return locationRepository.findAll();
     }
 
-    public Optional< List<Location>> getLocationsByCountry(String country){
+    public Optional<List<Location>> getLocationsByCountry(String country){
         return locationRepository.findLocationsByCountry(country);
     }
 
-    public Optional<Location> getLocationByCountryAndArea(String country, String area){
-        return locationRepository.findLocationByCountryAndArea(country, area);
-    }
+//    public Optional<Location> getLocationByCountryAndArea(String country, String area){
+//        return locationRepository.findLocationByCountryAndArea(country, area);
+//    }
 
-    public Location createLocation (String country, String area){
-        Location location = new Location();
-        location.setCountry(country);
-        location.setArea(area);
-        return locationRepository.insert(location);
+    public Location findOrCreateLocation (String country, String area){
+        Optional<Location> existingLocation = locationRepository.findLocationByCountryAndArea(country, area);
+        if(existingLocation.isPresent()){
+            return existingLocation.get();
+        } else{
+            Location location = new Location();
+            location.setCountry(country);
+            location.setArea(area);
+            return locationRepository.insert(location);
+        }
     }
 
 //    public Location createOrUpdateLocation (String country, String area, ObjectId objectId){

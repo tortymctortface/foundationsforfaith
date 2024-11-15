@@ -9,5 +9,5 @@ public interface LocationService {
 
     List<Location> getAllLocations();
     Optional<List<Location>> getLocationsByCountry(String country);
-    Location createLocation(String country, String area);
+    Location findOrCreateLocation (String country, String area);
 }

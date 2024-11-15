@@ -3,11 +3,12 @@ package com.edee.foundationsforfaith.services.impl;
 import com.edee.foundationsforfaith.dtos.NewProjectDto;
 import com.edee.foundationsforfaith.entities.Project;
 import com.edee.foundationsforfaith.entities.Location;
-import com.edee.foundationsforfaith.enums.BuildingType;
+import com.edee.foundationsforfaith.enums.ProjectType;
 import com.edee.foundationsforfaith.enums.ProgressStatus;
 import com.edee.foundationsforfaith.repositories.ProjectRepository;
+import com.edee.foundationsforfaith.services.LocationService;
 import com.edee.foundationsforfaith.services.ProjectService;
-import org.bson.types.ObjectId;
+import com.edee.foundationsforfaith.utils.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -25,6 +26,8 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectRepository projectRepository;
 
     @Autowired
+    private LocationService locationService;
+    @Autowired
     private MongoTemplate mongoTemplate;
 
     public List<Project> getAllProjects(){
@@ -39,17 +42,23 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = new Project();
         project.setProjectName(newProjectDto.getProjectName());
         project.setProjectDescription(newProjectDto.getProjectDescription());
-        project.setBuildingType(newProjectDto.getBuildingType() == null ? BuildingType.UNKNOWN : newProjectDto.getBuildingType());
+        project.setProjectType(
+                (newProjectDto.getProjectType() == null) || (EnumUtils.isEnumValue(newProjectDto.getProjectType(), ProjectType.class))
+                ? ProjectType.UNKNOWN
+                : Enum.valueOf(ProjectType.class, newProjectDto.getProjectType()));
         project.setProjectCreatedDate(LocalDate.now());
         project.setAmountOfFundingRequired(newProjectDto.getAmountOfFundingRequired() == null? 0 : newProjectDto.getAmountOfFundingRequired() );
         project.setProjectStatus(ProgressStatus.NEW_PROJECT);
         project.setCompleted(false);
         project.setFullyFunded(false);
-        projectRepository.insert(project);
+        Project savedProject = projectRepository.insert(project);
+
+        Location location = locationService.findOrCreateLocation(newProjectDto.getCountry(), newProjectDto.getArea());
 
         mongoTemplate.update(Location.class)
-                .matching(Criteria.where("area").is(newProjectDto.getArea()).and("country").is(newProjectDto.getCountry()))
-                .apply(new Update().push("projectIds").value(project));
+                .matching(Criteria.where("country").is(location.getCountry()).and("area").is(location.getArea()))
+                .apply(new Update().push("project_ids").value(savedProject))
+                .first();
 
         return project;
     }

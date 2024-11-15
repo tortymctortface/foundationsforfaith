@@ -1,6 +1,6 @@
 package com.edee.foundationsforfaith.dtos;
 
-import com.edee.foundationsforfaith.enums.BuildingType;
+import com.edee.foundationsforfaith.enums.ProjectType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +14,6 @@ public class NewProjectDto {
     private String area;
     private String projectName;
     private String projectDescription;
-    private BuildingType buildingType;
+    private String projectType;
     private Integer amountOfFundingRequired;
 }

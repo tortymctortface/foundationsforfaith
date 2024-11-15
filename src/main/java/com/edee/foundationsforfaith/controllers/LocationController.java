@@ -35,6 +35,6 @@ public class LocationController {
     public ResponseEntity<Location> createNewLocation (@PathVariable String country, @PathVariable String area){
         String safeCountry = Jsoup.clean(country, Safelist.basic());
         String safeArea = Jsoup.clean(area, Safelist.basic());
-        return new ResponseEntity<Location>((locationService.createLocation(safeCountry,safeArea)), HttpStatus.CREATED);
+        return new ResponseEntity<Location>((locationService.findOrCreateLocation(safeCountry,safeArea)), HttpStatus.CREATED);
     }
 }

@@ -7,19 +7,25 @@ import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "projectUpdates")
+@Document(collection = "project_updates")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectUpdates {
+public class ProjectUpdate {
 
     @Id
-    private ObjectId projectUpdatesId;
+    @Field("project_update_id")
+    private ObjectId projectUpdateId;
 
+    @Field("project_update_type")
     private ProjectUpdateType projectUpdateType;
 
+    @Field("description")
     private String description;
 
+    @Field("email_all_stones")
+    private Boolean emailAllStones;
 
 }
