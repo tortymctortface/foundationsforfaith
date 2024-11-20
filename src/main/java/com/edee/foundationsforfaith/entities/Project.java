@@ -54,11 +54,11 @@ public class Project {
     private boolean completed;
 
     @Field("stone_ids")
-    @DocumentReference
-    private List<Stone> stoneIds;
+    @DocumentReference(lazy = true)
+    private List<String> stoneIds;
 
     @Field("project_update_ids")
-    @DocumentReference
+    @DocumentReference(lazy = true)
     private List<ProjectUpdate> projectUpdateIds;
 
 }

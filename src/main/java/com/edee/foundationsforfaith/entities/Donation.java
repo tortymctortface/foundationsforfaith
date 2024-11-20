@@ -24,4 +24,8 @@ public class Donation {
     @Field("donation_amount")
     private String donationAmount;
 
+    private String projectId;
+
+    private String stoneId;
+
 }
