@@ -1,6 +1,5 @@
 package com.edee.foundationsforfaith.dtos;
 
-import com.edee.foundationsforfaith.enums.ProjectType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class NewProjectDto {
+public class ProjectCreationDto {
 
     private String country;
     private String area;

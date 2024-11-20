@@ -4,6 +4,8 @@ import com.edee.foundationsforfaith.entities.Project;
 import com.edee.foundationsforfaith.repositories.LocationRepository;
 import com.edee.foundationsforfaith.services.LocationService;
 import org.bson.types.ObjectId;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
@@ -35,8 +37,8 @@ public class LocationServiceImpl implements LocationService{
             return existingLocation.get();
         } else{
             Location location = new Location();
-            location.setCountry(country);
-            location.setArea(area);
+            location.setCountry(Jsoup.clean(country, Safelist.basic()));
+            location.setArea(Jsoup.clean(area, Safelist.basic()));
             return locationRepository.insert(location);
         }
     }

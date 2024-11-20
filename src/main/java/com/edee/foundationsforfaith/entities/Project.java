@@ -59,6 +59,6 @@ public class Project {
 
     @Field("project_update_ids")
     @DocumentReference
-    private List<ProjectUpdate> projectUpdatesIds;
+    private List<ProjectUpdate> projectUpdateIds;
 
 }
