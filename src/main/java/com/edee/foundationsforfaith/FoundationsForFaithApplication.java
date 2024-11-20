@@ -9,3 +9,4 @@ public class  FoundationsForFaithApplication {
 	public static void main(String[] args) {SpringApplication.run(FoundationsForFaithApplication.class, args);}
 
 }
+  
