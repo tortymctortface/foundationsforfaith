@@ -1,6 +1,6 @@
 package com.edee.foundationsforfaith.enums;
 
-public enum BuildingType {
+public enum ProjectType {
 
     SCHOOL,
     HOUSE,

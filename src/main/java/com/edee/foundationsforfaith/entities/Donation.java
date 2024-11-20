@@ -2,20 +2,26 @@ package com.edee.foundationsforfaith.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "reviews")
+@Document(collection = "donations")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Review {
+public class Donation {
 
     @Id
-    private ObjectId id;
+    @Field("donation_id")
+    private ObjectId donationId;
 
-    private String body;
+    @Field("donation_message")
+    private String donorMessage;
+
+    @Field("donation_amount")
+    private String donationAmount;
+
 }

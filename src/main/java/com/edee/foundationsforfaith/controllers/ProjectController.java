@@ -1,11 +1,9 @@
 package com.edee.foundationsforfaith.controllers;
 
-import com.edee.foundationsforfaith.dtos.NewProjectDto;
-import com.edee.foundationsforfaith.entities.Location;
+import com.edee.foundationsforfaith.dtos.ProjectCreationDto;
 import com.edee.foundationsforfaith.entities.Project;
 import com.edee.foundationsforfaith.services.LocationService;
 import com.edee.foundationsforfaith.services.ProjectService;
-import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +36,8 @@ public class ProjectController {
     }
 
     @PostMapping("/create/project")
-    public ResponseEntity<Project> createNewLocation (NewProjectDto newProjectDto){
-        String safeCountry = Jsoup.clean(newProjectDto.getCountry(), Safelist.basic());
-        String safeArea = Jsoup.clean(newProjectDto.getArea(), Safelist.basic());
-        Location location = locationService.createLocation(safeCountry,safeArea);
-        return new ResponseEntity<Project>((projectService.createProject(location.getLocationId(), newProjectDto)), HttpStatus.CREATED);
+    public ResponseEntity<Project> createNewProject (@RequestBody ProjectCreationDto projectCreationDto){
+        return new ResponseEntity<Project>(projectService.createProject(projectCreationDto), HttpStatus.CREATED);
     }
 
 }
