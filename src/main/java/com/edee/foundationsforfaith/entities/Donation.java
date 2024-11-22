@@ -22,10 +22,12 @@ public class Donation {
     private String donorMessage;
 
     @Field("donation_amount")
-    private String donationAmount;
+    private Integer donationAmount;
 
+    @Field("project_id")
     private String projectId;
 
+    @Field("stone_id")
     private String stoneId;
 
 }

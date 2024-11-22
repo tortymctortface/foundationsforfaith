@@ -61,4 +61,7 @@ public class Project {
     @DocumentReference(lazy = true)
     private List<ProjectUpdate> projectUpdateIds;
 
+    @Field("donation_ids")
+    private List<String> donationIds;
+
 }

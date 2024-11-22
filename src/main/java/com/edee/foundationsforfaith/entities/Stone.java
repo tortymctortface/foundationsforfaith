@@ -33,7 +33,9 @@ public class Stone {
     private Boolean sendUpdatesToDonor;
 
     @Field("project_ids")
-    @DocumentReference
     private List<String> projectIds;
+
+    @Field("donation_ids")
+    private List<String> donationIds;
 
 }
