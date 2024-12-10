@@ -35,8 +35,9 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.findAll();
     }
 
-    public Optional<Project> getProjectByProjectName(String projectName){
-        return projectRepository.findProjectByProjectName(projectName);
+    @Override
+    public Optional<Project> getProjectByProjectName(String projectName) {
+        return Optional.empty();
     }
 
     public Project createProject(ProjectCreationDto projectCreationDto){

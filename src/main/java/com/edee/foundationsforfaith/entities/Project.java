@@ -17,14 +17,12 @@ import java.util.List;
 
 @Document(collection = "projects")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class Project {
 
     @Id
     @Field("project_id")
     private ObjectId projectId;
-
     @Field("project_name")
     @Indexed(unique = true)
     private String projectName;
@@ -63,5 +61,18 @@ public class Project {
 
     @Field("donation_ids")
     private List<String> donationIds;
+
+    public Project (String name, ProjectType type, Integer fundingRequired){
+        this(name, type, fundingRequired, LocalDate.now());
+    }
+    public Project (String name, ProjectType type, Integer fundingRequired, LocalDate projectCreatedDate){
+        this.projectName = name;
+        this.projectCreatedDate = projectCreatedDate;
+        this.projectType = type;
+        this.amountOfFundingRequired = fundingRequired;
+        this.fullyFunded = false;
+        this.projectStatus = ProgressStatus.NEW_PROJECT;
+        this.completed = false;
+    }
 
 }
