@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectService {
-    List<Project> getAllProjects();
-    Optional<Project> getProjectByProjectName(String projectName);
     Project createProject(ProjectCreationDto projectCreationDto);
+
 }

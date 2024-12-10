@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,16 +38,13 @@ public class DonationServiceImpl implements DonationService {
     @Autowired
     private DonationRepository donationRepository;
     @Autowired
-    private ProjectService projectService;
-
-    @Autowired
     private StoneService stoneService;
     @Autowired
     private MongoTemplate mongoTemplate;
 
     public Donation donateAndAssociateWithProjectAndStone(DonationDto donationDto){
         String safeProjectName = (Jsoup.clean(donationDto.getProjectName(), Safelist.basic()));
-        Optional<Project> project = projectService.getProjectByProjectName(safeProjectName);
+        Optional<Project> project = projectRepository.findProjectByProjectName(safeProjectName);
 
         if(project.isPresent())
         {
@@ -80,6 +78,22 @@ public class DonationServiceImpl implements DonationService {
         }else{
             throw new UnableToInsertException("Cannot process donation as a project with name "+ donationDto.getProjectName()+ " does  not exist", HttpStatus.NOT_FOUND);
         }
+    }
+
+    public Integer getTotalDonationsInTimeframe(LocalDate start, LocalDate end, String projectName){
+        Integer totalDonationAmount = 0;
+        Optional<Project> project = projectRepository.findProjectByProjectName(projectName);
+        if(project.isPresent()) {
+            var donations = donationRepository.findAllBetweenDates(start, end, project.get().getProjectId().toString());
+            for(var donation : donations){
+                totalDonationAmount += donation.getDonationAmount();
+            }
+        }
+        else{
+            throw new UnableToInsertException("Cannot process donation as a project with name "+ projectName + " does  not exist", HttpStatus.NOT_FOUND);
+        }
+        return totalDonationAmount;
+
     }
 
 }

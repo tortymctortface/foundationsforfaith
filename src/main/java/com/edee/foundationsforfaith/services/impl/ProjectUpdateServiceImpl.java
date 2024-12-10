@@ -35,13 +35,11 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
     @Autowired
     private ProjectUpdateRepository projectUpdateRepository;
     @Autowired
-    private ProjectService projectService;
-    @Autowired
     private MongoTemplate mongoTemplate;
 
     public ProjectUpdate createProjectUpdate(ProjectUpdateCreationDto projectUpdateCreationDto){
         String safeProjectName = (Jsoup.clean(projectUpdateCreationDto.getProjectName(), Safelist.basic()));
-        Optional<Project> project = projectService.getProjectByProjectName(safeProjectName);
+        Optional<Project> project = projectRepository.findProjectByProjectName(safeProjectName);
 
         if(project.isPresent()){
 

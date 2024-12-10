@@ -31,13 +31,11 @@ public class StoneServiceImpl implements StoneService {
     @Autowired
     private StoneRepository stoneRepository;
     @Autowired
-    private ProjectService projectService;
-    @Autowired
     private MongoTemplate mongoTemplate;
 
     public Stone createStoneToAssociateWithProject(StoneCreationDto stoneCreationDto){
         String safeProjectName = (Jsoup.clean(stoneCreationDto.getProjectName(), Safelist.basic()));
-        Optional<Project> project = projectService.getProjectByProjectName(safeProjectName);
+        Optional<Project> project = projectRepository.findProjectByProjectName(safeProjectName);
 
         if(project.isPresent()) {
             if (stoneCreationDto.getEmailAddress() != null && !stoneCreationDto.getEmailAddress().isBlank()){
