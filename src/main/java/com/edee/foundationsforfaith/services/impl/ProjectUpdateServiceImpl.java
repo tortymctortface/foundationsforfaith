@@ -35,15 +35,14 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
     @Autowired
     private ProjectUpdateRepository projectUpdateRepository;
     @Autowired
-    private ProjectService projectService;
-    @Autowired
     private MongoTemplate mongoTemplate;
 
     public ProjectUpdate createProjectUpdate(ProjectUpdateCreationDto projectUpdateCreationDto){
         String safeProjectName = (Jsoup.clean(projectUpdateCreationDto.getProjectName(), Safelist.basic()));
-        Optional<Project> project = projectService.getProjectByProjectName(safeProjectName);
+        Optional<Project> project = projectRepository.findProjectByProjectName(safeProjectName);
 
         if(project.isPresent()){
+
             ProjectUpdate projectUpdate = new ProjectUpdate();
             projectUpdate.setProjectUpdateType(
                     (projectUpdateCreationDto.getProjectUpdateType() == null) || !(EnumUtils.isEnumValue(projectUpdateCreationDto.getProjectUpdateType(), ProjectUpdateType.class))
@@ -53,14 +52,15 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
             projectUpdate.setEmailAllStones(projectUpdateCreationDto.getEmailAllStones());
             ProjectUpdate savedProjectUpdate = projectUpdateRepository.insert(projectUpdate);
 
-            mongoTemplate.update(Location.class)
+            mongoTemplate.update(Project.class)
                     .matching(Criteria.where("project_name").is(safeProjectName))
                     .apply(new Update().push("project_update_ids").value(savedProjectUpdate))
                     .first();
 
-            return projectUpdate;
+            return savedProjectUpdate;
+
         }else{
-            throw new UnableToInsertException("Cannot create project update as project with"+projectUpdateCreationDto.getProjectName()+"does  not exist", HttpStatus.NOT_FOUND);
+            throw new UnableToInsertException("Cannot add project update as project with"+projectUpdateCreationDto.getProjectName()+"does  not exist", HttpStatus.NOT_FOUND);
         }
     }
 

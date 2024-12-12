@@ -7,7 +7,6 @@ import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,10 +25,6 @@ public class LocationServiceImpl implements LocationService{
     public Optional<List<Location>> getLocationsByCountry(String country){
         return locationRepository.findLocationsByCountry(country);
     }
-
-//    public Optional<Location> getLocationByCountryAndArea(String country, String area){
-//        return locationRepository.findLocationByCountryAndArea(country, area);
-//    }
 
     public Location findOrCreateLocation (String country, String area){
         Optional<Location> existingLocation = locationRepository.findLocationByCountryAndArea(country, area);

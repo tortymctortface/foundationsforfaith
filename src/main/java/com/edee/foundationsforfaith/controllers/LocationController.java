@@ -1,9 +1,7 @@
 package com.edee.foundationsforfaith.controllers;
 
 import com.edee.foundationsforfaith.entities.Location;
-import com.edee.foundationsforfaith.entities.Project;
 import com.edee.foundationsforfaith.services.LocationService;
-import org.bson.types.ObjectId;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
