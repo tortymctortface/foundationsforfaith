@@ -13,7 +13,6 @@ import java.time.LocalDate;
 
 @Document(collection = "donations")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class Donation {
 

@@ -26,10 +26,6 @@ public class LocationServiceImpl implements LocationService{
         return locationRepository.findLocationsByCountry(country);
     }
 
-//    public Optional<Location> getLocationByCountryAndArea(String country, String area){
-//        return locationRepository.findLocationByCountryAndArea(country, area);
-//    }
-
     public Location findOrCreateLocation (String country, String area){
         Optional<Location> existingLocation = locationRepository.findLocationByCountryAndArea(country, area);
         if(existingLocation.isPresent()){

@@ -1,6 +1,7 @@
 package com.edee.foundationsforfaith.services.impl;
 
 import com.edee.foundationsforfaith.dtos.DonationDto;
+import com.edee.foundationsforfaith.dtos.DonationStatsDto;
 import com.edee.foundationsforfaith.dtos.StoneCreationDto;
 import com.edee.foundationsforfaith.entities.Donation;
 import com.edee.foundationsforfaith.entities.Project;
@@ -16,6 +17,7 @@ import lombok.extern.log4j.Log4j2;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Update;
@@ -23,8 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Optional;
 
 @Log4j2
@@ -41,6 +44,10 @@ public class DonationServiceImpl implements DonationService {
     private StoneService stoneService;
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Qualifier("renovationServiceImpl")
+    @Autowired
+    private ProjectService projectService;
+
 
     public Donation donateAndAssociateWithProjectAndStone(DonationDto donationDto){
         String safeProjectName = (Jsoup.clean(donationDto.getProjectName(), Safelist.basic()));
@@ -80,20 +87,30 @@ public class DonationServiceImpl implements DonationService {
         }
     }
 
-    public Integer getTotalDonationsInTimeframe(LocalDate start, LocalDate end, String projectName){
+    public DonationStatsDto getTotalDonationsInTimeframe(LocalDate start, LocalDate end, String projectName){
         Integer totalDonationAmount = 0;
-        Optional<Project> project = projectRepository.findProjectByProjectName(projectName);
-        if(project.isPresent()) {
-            var donations = donationRepository.findAllBetweenDates(start, end, project.get().getProjectId().toString());
-            for(var donation : donations){
+        int index = 0;
+        Project project = projectService.getDefensiveProjectByProjectName(projectName);
+        var donations = donationRepository.findAllBetweenDates(start.atStartOfDay(), end.atTime(LocalTime.MAX), project.getProjectId().toString());
+        int[] donationAmounts = new int[donations.size()];
+        for(var donation : donations){
+            if(ProjectService.isValidDonationAmount(donation.getDonationAmount())) {
                 totalDonationAmount += donation.getDonationAmount();
+                donationAmounts[index] = donation.getDonationAmount();
+                index++;
             }
         }
-        else{
-            throw new UnableToInsertException("Cannot process donation as a project with name "+ projectName + " does  not exist", HttpStatus.NOT_FOUND);
-        }
-        return totalDonationAmount;
-
+        DonationStatsDto donationStatsDto = new DonationStatsDto();
+        donationStatsDto.setProjectFunding(totalDonationAmount);
+        getAverageDonationAmountPerProject(donationStatsDto, donationAmounts);
+        return donationStatsDto;
     }
 
+    public void getAverageDonationAmountPerProject(DonationStatsDto donationStatsDto, int[] donations){
+        // Calling the default method
+        double averageRating = projectService.getAverageRating(donations);
+        log.info("length = " + donations.length);
+        log.info("length = " + Arrays.toString(donations));
+        donationStatsDto.setProjectAverageDonation(averageRating);
+    }
 }

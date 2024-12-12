@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 @Service
-public class NewBuildServiceImpl implements ProjectService {
+public class NewBuildServiceImpl extends ProjectServiceImpl implements ProjectService {
 
     @Autowired
     private ProjectRepository projectRepository;

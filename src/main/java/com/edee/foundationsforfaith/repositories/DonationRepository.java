@@ -7,10 +7,11 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface DonationRepository extends MongoRepository<Donation, ObjectId> {
-    @Query("SELECT  FROM donations d WHERE d.projectId = projectId AND d.donationCreationDate BETWEEN :startDate AND :endDate")
-    List<Donation> findAllBetweenDates(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("endDate") String projectId);
+    @Query("{'projectId': ?2, 'donation_creation_date': { $gte: ?0, $lte: ?1 }}")
+    List<Donation> findAllBetweenDates(LocalDateTime startDate, LocalDateTime endDate, String projectId);
 
 }

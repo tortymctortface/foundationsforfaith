@@ -65,6 +65,12 @@ public class Project {
     public Project (String name, ProjectType type, Integer fundingRequired){
         this(name, type, fundingRequired, LocalDate.now());
     }
+    public Project (ObjectId id, String name, ProjectType type, Integer fundingRequired){
+        this.projectId = id;
+        this.projectName = name;
+        this.projectType = type;
+        this.amountOfFundingRequired = fundingRequired;
+    }
     public Project (String name, ProjectType type, Integer fundingRequired, LocalDate projectCreatedDate){
         this.projectName = name;
         this.projectCreatedDate = projectCreatedDate;
