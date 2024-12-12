@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Optional;
 
 @Log4j2
@@ -86,11 +87,11 @@ public class DonationServiceImpl implements DonationService {
         }
     }
 
-    public DonationStatsDto getTotalDonationsInTimeframe(LocalDate start, LocalDate end, String projectName){
+    public DonationStatsDto getTotalDonationsInTimeframe(Date start, Date end, String projectName){
         Integer totalDonationAmount = 0;
         int index = 0;
         Project project = projectService.getDefensiveProjectByProjectName(projectName);
-        var donations = donationRepository.findAllBetweenDates(start.atStartOfDay(), end.atTime(LocalTime.MAX), project.getProjectId().toString());
+        var donations = donationRepository.findAllBetweenDates(start, end, project.getProjectId().toString());
         int[] donationAmounts = new int[donations.size()];
         for(var donation : donations){
             if(ProjectService.isValidDonationAmount(donation.getDonationAmount())) {

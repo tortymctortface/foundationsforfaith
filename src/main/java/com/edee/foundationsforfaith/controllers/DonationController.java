@@ -12,8 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/api")
@@ -37,20 +40,19 @@ public class DonationController {
     @PostMapping("/totalDonations/project")
     public ResponseEntity<?> getTotalDonationsByProjectName (@RequestParam("startDate") String startDate,
                                                              @RequestParam("endDate") String endDate,
-                                                             @RequestParam("projectName") String projectName){
-        try{
-            LocalDate start = LocalDate.parse(startDate);
-            LocalDate end = LocalDate.parse(endDate);
+                                                             @RequestParam("projectName") String projectName) {
+
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            Date start = format.parse(startDate);
+            Date end = format.parse(endDate);
             return new ResponseEntity<DonationStatsDto>(donationService.getTotalDonationsInTimeframe(start, end, projectName), HttpStatus.FOUND);
-        } catch (
-                UnableToInsertException e){
-            return ResponseEntity.status(e.getErrorCode()).body(e.getMessage());
-        } catch (Exception e){
+        } catch (ParseException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (UnableToInsertException e){
+            return ResponseEntity.status(e.getErrorCode()).body(e.getMessage());
         }
+
     }
-
-
-
 
 }

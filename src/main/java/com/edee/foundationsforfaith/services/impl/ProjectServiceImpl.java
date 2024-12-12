@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public abstract class ProjectServiceImpl implements ProjectService {
+public abstract sealed class ProjectServiceImpl implements ProjectService permits NewBuildServiceImpl,RenovationServiceImpl{
 
     @Autowired
     private ProjectRepository projectRepository;
