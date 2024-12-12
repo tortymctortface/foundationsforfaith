@@ -4,6 +4,7 @@ import com.edee.foundationsforfaith.dtos.DonationDto;
 import com.edee.foundationsforfaith.dtos.DonationStatsDto;
 import com.edee.foundationsforfaith.entities.Donation;
 import com.edee.foundationsforfaith.exceptions.UnableToInsertException;
+import com.edee.foundationsforfaith.records.DonationRecord;
 import com.edee.foundationsforfaith.services.DonationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
@@ -28,7 +29,8 @@ public class DonationController {
     @PostMapping("/create/donation")
     public ResponseEntity<?> processDonation (@RequestBody DonationDto donationDto){
         try{
-            return new ResponseEntity<Donation>(donationService.donateAndAssociateWithProjectAndStone(donationDto), HttpStatus.CREATED);
+            DonationRecord donationRecord = new DonationRecord(donationDto.getDonorMessage(), donationDto.getDonationAmount(), donationDto.getProjectName(), donationDto.getStoneEmail());
+            return new ResponseEntity<Donation>(donationService.donateAndAssociateWithProjectAndStone(donationRecord), HttpStatus.CREATED);
         } catch (
                 UnableToInsertException e){
             return ResponseEntity.status(e.getErrorCode()).body(e.getMessage());
@@ -38,15 +40,19 @@ public class DonationController {
     }
 
     @PostMapping("/totalDonations/project")
-    public ResponseEntity<?> getTotalDonationsByProjectName (@RequestParam("startDate") String startDate,
+    public ResponseEntity<?> getTotalDonationsByProjectName(@RequestParam("startDate") String startDate,
                                                              @RequestParam("endDate") String endDate,
                                                              @RequestParam("projectName") String projectName) {
 
         try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date start = format.parse(startDate);
-            Date end = format.parse(endDate);
-            return new ResponseEntity<DonationStatsDto>(donationService.getTotalDonationsInTimeframe(start, end, projectName), HttpStatus.FOUND);
+            if (endDate ==null || startDate == null) {
+                return new ResponseEntity<DonationStatsDto>(donationService.getTotalDonations(projectName), HttpStatus.FOUND);
+            } else {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                Date start = format.parse(startDate);
+                Date end = format.parse(endDate);
+                return new ResponseEntity<DonationStatsDto>(donationService.getTotalDonations(start, end, projectName), HttpStatus.FOUND);
+            }
         } catch (ParseException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         } catch (UnableToInsertException e){

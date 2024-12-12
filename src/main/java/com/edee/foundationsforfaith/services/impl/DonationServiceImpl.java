@@ -1,11 +1,11 @@
 package com.edee.foundationsforfaith.services.impl;
 
-import com.edee.foundationsforfaith.dtos.DonationDto;
 import com.edee.foundationsforfaith.dtos.DonationStatsDto;
 import com.edee.foundationsforfaith.entities.Donation;
 import com.edee.foundationsforfaith.entities.Project;
 import com.edee.foundationsforfaith.entities.Stone;
 import com.edee.foundationsforfaith.exceptions.UnableToInsertException;
+import com.edee.foundationsforfaith.records.DonationRecord;
 import com.edee.foundationsforfaith.repositories.DonationRepository;
 import com.edee.foundationsforfaith.repositories.ProjectRepository;
 import com.edee.foundationsforfaith.repositories.StoneRepository;
@@ -23,9 +23,6 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
@@ -49,19 +46,19 @@ public class DonationServiceImpl implements DonationService {
     private ProjectService projectService;
 
 
-    public Donation donateAndAssociateWithProjectAndStone(DonationDto donationDto){
-        String safeProjectName = (Jsoup.clean(donationDto.getProjectName(), Safelist.basic()));
+    public Donation donateAndAssociateWithProjectAndStone(DonationRecord donationRecord){
+        String safeProjectName = (Jsoup.clean(donationRecord.projectName(), Safelist.basic()));
         Optional<Project> project = projectRepository.findProjectByProjectName(safeProjectName);
 
         if(project.isPresent())
         {
-            String safeEmail = (Jsoup.clean(donationDto.getStoneEmail(), Safelist.basic()));
+            String safeEmail = (Jsoup.clean(donationRecord.stoneEmail(), Safelist.basic()));
             Optional<Stone> stone = stoneService.getStoneByEmail(safeEmail);
             if(stone.isPresent())
             {
                 Donation donation = new Donation();
-                donation.setDonorMessage(Jsoup.clean(donationDto.getDonorMessage(), Safelist.basic()));
-                donation.setDonationAmount(donationDto.getDonationAmount());
+                donation.setDonorMessage(Jsoup.clean(donationRecord.donorMessage(), Safelist.basic()));
+                donation.setDonationAmount(donationRecord.donationAmount());
                 donation.setProjectId(project.get().getProjectId().toString());
                 donation.setStoneId(stone.get().getStoneId().toString());
 
@@ -77,17 +74,37 @@ public class DonationServiceImpl implements DonationService {
                         .apply(new Update().push("donation_ids").value(savedDonation))
                         .first();
 
+                log.info(donationRecord.thanks());
                 return savedDonation;
 
             }else{
-                throw new UnableToInsertException("Cannot process donation as a user with the email address : "+ donationDto.getStoneEmail() + " does not exist", HttpStatus.NOT_FOUND);
+                throw new UnableToInsertException("Cannot process donation as a user with the email address : "+ donationRecord.stoneEmail() + " does not exist", HttpStatus.NOT_FOUND);
             }
         }else{
-            throw new UnableToInsertException("Cannot process donation as a project with name "+ donationDto.getProjectName()+ " does  not exist", HttpStatus.NOT_FOUND);
+            throw new UnableToInsertException("Cannot process donation as a project with name "+ donationRecord.projectName()+ " does  not exist", HttpStatus.NOT_FOUND);
         }
     }
 
-    public DonationStatsDto getTotalDonationsInTimeframe(Date start, Date end, String projectName){
+    public DonationStatsDto getTotalDonations(String projectName){
+        Integer totalDonationAmount = 0;
+        int index = 0;
+        Project project = projectService.getDefensiveProjectByProjectName(projectName);
+        var donations = donationRepository.findAllByProjectId(project.getProjectId().toString());
+        int[] donationAmounts = new int[donations.size()];
+        for(var donation : donations){
+            if(ProjectService.isValidDonationAmount(donation.getDonationAmount())) {
+                totalDonationAmount += donation.getDonationAmount();
+                donationAmounts[index] = donation.getDonationAmount();
+                index++;
+            }
+        }
+        DonationStatsDto donationStatsDto = new DonationStatsDto();
+        donationStatsDto.setProjectFunding(totalDonationAmount);
+        getAverageDonationAmountPerProject(donationStatsDto, donationAmounts);
+        return donationStatsDto;
+    }
+
+    public DonationStatsDto getTotalDonations(Date start, Date end, String projectName){
         Integer totalDonationAmount = 0;
         int index = 0;
         Project project = projectService.getDefensiveProjectByProjectName(projectName);

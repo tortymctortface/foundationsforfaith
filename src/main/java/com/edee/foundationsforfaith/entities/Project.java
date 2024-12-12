@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Document(collection = "projects")
 @Data
@@ -62,6 +63,8 @@ public class Project {
     @Field("donation_ids")
     private List<String> donationIds;
 
+    public Integer requiresSubstantialFunding = 1500;
+
     public Project (String name, ProjectType type, String status, Integer fundingRequired){
         this(name, type, status,fundingRequired, LocalDate.now());
     }
@@ -90,6 +93,11 @@ public class Project {
             default -> ProgressStatus.NEW_PROJECT;
         };
         this.completed = false;
+    }
+
+    public boolean expensiveProject(Integer value){
+        Predicate<Integer> isLarge = num -> num >= this.requiresSubstantialFunding;
+        return isLarge.test(value);
     }
 
 }

@@ -18,14 +18,17 @@ public class LocationServiceImpl implements LocationService{
     @Autowired
     private LocationRepository locationRepository;
 
+    @Override
     public List<Location> getAllLocations(){
         return locationRepository.findAll();
     }
 
+    @Override
     public Optional<List<Location>> getLocationsByCountry(String country){
         return locationRepository.findLocationsByCountry(country);
     }
 
+    @Override
     public Location findOrCreateLocation (String country, String area){
         Optional<Location> existingLocation = locationRepository.findLocationByCountryAndArea(country, area);
         if(existingLocation.isPresent()){
@@ -35,16 +38,4 @@ public class LocationServiceImpl implements LocationService{
             return locationRepository.insert(location);
         }
     }
-
-//    public Location createOrUpdateLocation (String country, String area, ObjectId objectId){
-//        Optional<Location> location = getLocationByCountryAndArea(country, area);
-//        if(location.isPresent()){
-//            location.
-//        }else{
-//            location.setCountry(country);
-//            location.setArea(area);
-//        }
-//
-//        return locationRepository.insert(location);
-//    }
 }
