@@ -31,9 +31,7 @@ public class LocationServiceImpl implements LocationService{
         if(existingLocation.isPresent()){
             return existingLocation.get();
         } else{
-            Location location = new Location();
-            location.setCountry(Jsoup.clean(country, Safelist.basic()));
-            location.setArea(Jsoup.clean(area, Safelist.basic()));
+            Location location = new Location(null,(Jsoup.clean(country, Safelist.basic())), (Jsoup.clean(area, Safelist.basic())), null);
             return locationRepository.insert(location);
         }
     }

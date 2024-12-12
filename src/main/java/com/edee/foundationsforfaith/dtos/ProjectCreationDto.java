@@ -14,6 +14,7 @@ public class ProjectCreationDto {
     private String projectName;
     private String projectDescription;
     private String projectType;
+    private String projectStatus;
     private Integer amountOfFundingRequired;
     private Integer buildingAgeInYears;
     private Boolean previouslyCompletedProject;

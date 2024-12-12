@@ -1,5 +1,6 @@
 package com.edee.foundationsforfaith.entities;
 
+import com.edee.foundationsforfaith.enums.ProgressStatus;
 import com.edee.foundationsforfaith.enums.ProjectType;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,7 +12,7 @@ public class NewBuild extends Project{
     private final Boolean siteAcquired;
 
     public NewBuild(String name, ProjectType projectType, Integer fundingRequired, Boolean siteAcquired){
-        super(name, projectType, fundingRequired);
+        super(name, projectType, String.valueOf(ProgressStatus.NEW_PROJECT), fundingRequired);
         this.siteAcquired = siteAcquired;
     }
 

@@ -62,8 +62,8 @@ public class Project {
     @Field("donation_ids")
     private List<String> donationIds;
 
-    public Project (String name, ProjectType type, Integer fundingRequired){
-        this(name, type, fundingRequired, LocalDate.now());
+    public Project (String name, ProjectType type, String status, Integer fundingRequired){
+        this(name, type, status,fundingRequired, LocalDate.now());
     }
     public Project (ObjectId id, String name, ProjectType type, Integer fundingRequired){
         this.projectId = id;
@@ -71,13 +71,24 @@ public class Project {
         this.projectType = type;
         this.amountOfFundingRequired = fundingRequired;
     }
-    public Project (String name, ProjectType type, Integer fundingRequired, LocalDate projectCreatedDate){
+    public Project (String name, ProjectType type, String status, Integer fundingRequired, LocalDate projectCreatedDate){
         this.projectName = name;
         this.projectCreatedDate = projectCreatedDate;
         this.projectType = type;
         this.amountOfFundingRequired = fundingRequired;
         this.fullyFunded = false;
-        this.projectStatus = ProgressStatus.NEW_PROJECT;
+        this.projectStatus = switch (status) {
+            case "FUND_RAISING" -> ProgressStatus.FUND_RAISING;
+            case "FUNDING_ACHIEVED" -> ProgressStatus.FUNDING_ACHIEVED;
+            case "SEARCHING_FOR_SITE" -> ProgressStatus.SEARCHING_FOR_SITE;
+            case "SITE_PURCHASED" -> ProgressStatus.SITE_PURCHASED;
+            case "BUILD_START_SCHEDULED" -> ProgressStatus.BUILD_START_SCHEDULED;
+            case "BUILD_IN_PROGRESS" -> ProgressStatus.BUILD_IN_PROGRESS;
+            case "EXTERIOR_BUILD_COMPLETE" -> ProgressStatus.EXTERIOR_BUILD_COMPLETE;
+            case "FURNISHING_IN_PROGRESS" -> ProgressStatus.FURNISHING_IN_PROGRESS;
+            case "BUILD_COMPLETE" -> ProgressStatus.BUILD_COMPLETE;
+            default -> ProgressStatus.NEW_PROJECT;
+        };
         this.completed = false;
     }
 

@@ -2,7 +2,6 @@ package com.edee.foundationsforfaith.services.impl;
 
 import com.edee.foundationsforfaith.dtos.DonationDto;
 import com.edee.foundationsforfaith.dtos.DonationStatsDto;
-import com.edee.foundationsforfaith.dtos.StoneCreationDto;
 import com.edee.foundationsforfaith.entities.Donation;
 import com.edee.foundationsforfaith.entities.Project;
 import com.edee.foundationsforfaith.entities.Stone;

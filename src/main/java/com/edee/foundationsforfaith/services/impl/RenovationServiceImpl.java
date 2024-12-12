@@ -30,6 +30,7 @@ public class RenovationServiceImpl extends ProjectServiceImpl implements Project
     public Project createProject(ProjectCreationDto projectCreationDto) {
         Project project = new Renovation(projectCreationDto.getProjectName(),
                 EnumUtils.getProjectType(projectCreationDto.getProjectType()),
+                projectCreationDto.getProjectStatus(),
                 projectCreationDto.getAmountOfFundingRequired() == null ? 0 : projectCreationDto.getAmountOfFundingRequired(),
                 projectCreationDto.getBuildingAgeInYears(),
                 projectCreationDto.getPreviouslyCompletedProject());

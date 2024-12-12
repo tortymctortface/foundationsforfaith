@@ -12,8 +12,8 @@ public class Renovation extends Project{
 
     private final Boolean previouslyCompletedProject;
 
-    public Renovation(String name, ProjectType projectType, Integer fundingRequired, Integer buildingAgeInYears, Boolean previouslyCompletedProject){
-        super(name, projectType, fundingRequired);
+    public Renovation(String name, ProjectType projectType, String progressStatus, Integer fundingRequired, Integer buildingAgeInYears, Boolean previouslyCompletedProject){
+        super(name, projectType, progressStatus, fundingRequired);
         this.buildingAgeInYears = buildingAgeInYears;
         this.previouslyCompletedProject = previouslyCompletedProject;
     }
