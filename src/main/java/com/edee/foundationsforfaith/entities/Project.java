@@ -2,11 +2,13 @@ package com.edee.foundationsforfaith.entities;
 
 import com.edee.foundationsforfaith.enums.ProjectType;
 import com.edee.foundationsforfaith.enums.ProgressStatus;
+import com.edee.foundationsforfaith.utils.CalculationUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
@@ -43,8 +45,8 @@ public class Project {
     @Field("amount_of_funding_required")
     private Integer amountOfFundingRequired;
 
-    @Field("fully_funded")
-    private boolean fullyFunded;
+    @Field("funding_acquired")
+    private Integer fundingAcquired;
 
     @Field("project_build_start_date")
     private LocalDate projectBuildStartDate;
@@ -53,16 +55,14 @@ public class Project {
     private boolean completed;
 
     @Field("stone_ids")
-    @DocumentReference(lazy = true)
-    private List<String> stoneIds;
+    private  List<String> stoneIds;
 
     @Field("project_update_ids")
-    @DocumentReference(lazy = true)
     private List<ProjectUpdate> projectUpdateIds;
 
     @Field("donation_ids")
-    private List<String> donationIds;
-
+    private  List<String>  donationIds;
+    @Transient
     public Integer requiresSubstantialFunding = 1500;
 
     public Project (String name, ProjectType type, String status, Integer fundingRequired){
@@ -79,7 +79,6 @@ public class Project {
         this.projectCreatedDate = projectCreatedDate;
         this.projectType = type;
         this.amountOfFundingRequired = fundingRequired;
-        this.fullyFunded = false;
         this.projectStatus = switch (status) {
             case "FUND_RAISING" -> ProgressStatus.FUND_RAISING;
             case "FUNDING_ACHIEVED" -> ProgressStatus.FUNDING_ACHIEVED;
@@ -97,6 +96,11 @@ public class Project {
 
     public boolean expensiveProject(Integer value){
         Predicate<Integer> isLarge = num -> num >= this.requiresSubstantialFunding;
+        return isLarge.test(value);
+    }
+
+    public boolean expensiveNewBuild(Integer value){
+        Predicate<Integer> isLarge = CalculationUtils::isExpensive;
         return isLarge.test(value);
     }
 

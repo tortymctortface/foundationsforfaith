@@ -66,7 +66,9 @@ public class DonationServiceImpl implements DonationService {
 
                 mongoTemplate.update(Project.class)
                         .matching(Criteria.where("project_name").is(safeProjectName))
-                        .apply(new Update().push("donation_ids").value(savedDonation))
+                        .apply(new Update()
+                                .inc("funding_acquired", donationRecord.donationAmount())
+                                .push("donation_ids").value(savedDonation))
                         .first();
 
                 mongoTemplate.update(Project.class)

@@ -1,6 +1,7 @@
 package com.edee.foundationsforfaith.entities;
 
 import com.edee.foundationsforfaith.enums.ProjectType;
+import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
@@ -26,6 +27,11 @@ public class Renovation extends Project{
         this.buildingAgeInYears = buildingAgeInYears;
         this.previouslyCompletedProject = previouslyCompletedProject;
         this.expensiveRenovation = super.expensiveProject(fundingRequired);
+    }
+    public Renovation(){
+        this.buildingAgeInYears = null;
+        this.previouslyCompletedProject = null;
+        this.expensiveRenovation = false;
     }
 
 }
