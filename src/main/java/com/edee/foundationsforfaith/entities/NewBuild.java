@@ -2,15 +2,16 @@ package com.edee.foundationsforfaith.entities;
 
 import com.edee.foundationsforfaith.enums.ProgressStatus;
 import com.edee.foundationsforfaith.enums.ProjectType;
+import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
-
+@Data
 @Document(collection = "projects")
 public class NewBuild extends Project{
 
-    private final Boolean siteAcquired;
-    private final Boolean expensiveBuild;
+    private Boolean siteAcquired;
+    private Boolean expensiveBuild;
 
     public NewBuild(String name, ProjectType projectType, Integer fundingRequired, Boolean siteAcquired){
         super(name, projectType, String.valueOf(ProgressStatus.NEW_PROJECT), fundingRequired);

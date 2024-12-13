@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Log4j2
@@ -47,13 +48,10 @@ public class DonationServiceImpl implements DonationService {
 
 
     public Donation donateAndAssociateWithProjectAndStone(DonationRecord donationRecord){
-        String safeProjectName = (Jsoup.clean(donationRecord.projectName(), Safelist.basic()));
-        Optional<Project> project = projectRepository.findProjectByProjectName(safeProjectName);
-
+        Optional<Project> project = projectRepository.findProjectByProjectName(donationRecord.projectName());
         if(project.isPresent())
         {
-            String safeEmail = (Jsoup.clean(donationRecord.stoneEmail(), Safelist.basic()));
-            Optional<Stone> stone = stoneService.getStoneByEmail(safeEmail);
+            Optional<Stone> stone = stoneService.getStoneByEmail(donationRecord.stoneEmail());
             if(stone.isPresent())
             {
                 Donation donation = new Donation();
@@ -65,14 +63,14 @@ public class DonationServiceImpl implements DonationService {
                 Donation savedDonation = donationRepository.insert(donation);
 
                 mongoTemplate.update(Project.class)
-                        .matching(Criteria.where("project_name").is(safeProjectName))
+                        .matching(Criteria.where("project_name").is(donationRecord.projectName()))
                         .apply(new Update()
                                 .inc("funding_acquired", donationRecord.donationAmount())
                                 .push("donation_ids").value(savedDonation))
                         .first();
 
                 mongoTemplate.update(Project.class)
-                        .matching(Criteria.where("email").is(safeEmail))
+                        .matching(Criteria.where("email").is(donationRecord.stoneEmail()))
                         .apply(new Update().push("donation_ids").value(savedDonation))
                         .first();
 
@@ -88,29 +86,20 @@ public class DonationServiceImpl implements DonationService {
     }
 
     public DonationStatsDto getTotalDonations(String projectName){
-        Integer totalDonationAmount = 0;
-        int index = 0;
         Project project = projectService.getDefensiveProjectByProjectName(projectName);
         var donations = donationRepository.findAllByProjectId(project.getProjectId().toString());
-        int[] donationAmounts = new int[donations.size()];
-        for(var donation : donations){
-            if(ProjectService.isValidDonationAmount(donation.getDonationAmount())) {
-                totalDonationAmount += donation.getDonationAmount();
-                donationAmounts[index] = donation.getDonationAmount();
-                index++;
-            }
-        }
-        DonationStatsDto donationStatsDto = new DonationStatsDto();
-        donationStatsDto.setProjectFunding(totalDonationAmount);
-        getAverageDonationAmountPerProject(donationStatsDto, donationAmounts);
-        return donationStatsDto;
+        return getDonationStats(donations, project);
     }
 
     public DonationStatsDto getTotalDonations(Date start, Date end, String projectName){
-        Integer totalDonationAmount = 0;
-        int index = 0;
         Project project = projectService.getDefensiveProjectByProjectName(projectName);
         var donations = donationRepository.findAllBetweenDates(start, end, project.getProjectId().toString());
+        return getDonationStats(donations, project);
+    }
+
+    private DonationStatsDto getDonationStats (List<Donation> donations, Project project){
+        Integer totalDonationAmount = 0;
+        int index = 0;
         int[] donationAmounts = new int[donations.size()];
         for(var donation : donations){
             if(ProjectService.isValidDonationAmount(donation.getDonationAmount())) {
@@ -122,6 +111,7 @@ public class DonationServiceImpl implements DonationService {
         DonationStatsDto donationStatsDto = new DonationStatsDto();
         donationStatsDto.setProjectFunding(totalDonationAmount);
         getAverageDonationAmountPerProject(donationStatsDto, donationAmounts);
+        donationStatsDto.setUserMessage(project.getProjectName(), totalDonationAmount, project.getAmountOfFundingRequired());
         return donationStatsDto;
     }
 

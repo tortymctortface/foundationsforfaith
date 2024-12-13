@@ -1,5 +1,6 @@
 package com.edee.foundationsforfaith.entities;
 
+import com.edee.foundationsforfaith.constants.ApplicationConstants;
 import com.edee.foundationsforfaith.enums.ProjectType;
 import com.edee.foundationsforfaith.enums.ProgressStatus;
 import com.edee.foundationsforfaith.utils.CalculationUtils;
@@ -50,7 +51,6 @@ public class Project {
 
     @Field("project_build_start_date")
     private LocalDate projectBuildStartDate;
-
     @Field("completed")
     private boolean completed;
 
@@ -62,8 +62,6 @@ public class Project {
 
     @Field("donation_ids")
     private  List<String>  donationIds;
-    @Transient
-    public Integer requiresSubstantialFunding = 1500;
 
     public Project (String name, ProjectType type, String status, Integer fundingRequired){
         this(name, type, status,fundingRequired, LocalDate.now());
@@ -95,7 +93,7 @@ public class Project {
     }
 
     public boolean expensiveProject(Integer value){
-        Predicate<Integer> isLarge = num -> num >= this.requiresSubstantialFunding;
+        Predicate<Integer> isLarge = num -> num >= ApplicationConstants.requiresSubstantialFunding;
         return isLarge.test(value);
     }
 

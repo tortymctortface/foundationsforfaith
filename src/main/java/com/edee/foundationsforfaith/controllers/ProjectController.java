@@ -11,6 +11,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,13 +47,21 @@ public class ProjectController {
     }
 
     @PostMapping("/create/project/newBuild")
-    public ResponseEntity<Project> createNewBuildProject (@RequestBody ProjectCreationDto projectCreationDto){
-        return new ResponseEntity<Project>(newBuildServiceImpl.createProject(projectCreationDto), HttpStatus.CREATED);
+    public ResponseEntity<?> createNewBuildProject (@RequestBody ProjectCreationDto projectCreationDto){
+        try {
+            return new ResponseEntity<Project>(newBuildServiceImpl.createProject(projectCreationDto), HttpStatus.CREATED);
+        }catch (DuplicateKeyException duplicateKeyException){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Duplicate project name used. Error: " + duplicateKeyException.getMessage());
+        }
     }
 
     @PostMapping("/create/project/renovation")
-    public ResponseEntity<Project> createRenovationProject (@RequestBody ProjectCreationDto projectCreationDto){
-        return new ResponseEntity<Project>(renovationServiceImpl.createProject(projectCreationDto), HttpStatus.CREATED);
+    public ResponseEntity<?> createRenovationProject (@RequestBody ProjectCreationDto projectCreationDto){
+        try{
+            return new ResponseEntity<Project>(renovationServiceImpl.createProject(projectCreationDto), HttpStatus.CREATED);
+        }catch (DuplicateKeyException duplicateKeyException){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Duplicate project name used. Error: " + duplicateKeyException.getMessage());
+        }
     }
 
 }

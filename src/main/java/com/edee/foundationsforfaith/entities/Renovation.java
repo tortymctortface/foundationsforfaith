@@ -1,11 +1,12 @@
 package com.edee.foundationsforfaith.entities;
 
 import com.edee.foundationsforfaith.enums.ProjectType;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
-
+@Data
 @Document(collection = "projects")
 public class Renovation extends Project{
 
