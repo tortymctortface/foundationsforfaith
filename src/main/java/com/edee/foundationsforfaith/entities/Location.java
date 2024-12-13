@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.List;
 
 @Document(collection = "locations")
-@Data
 @CompoundIndex(name = "unique_country_area", def = "{'country': 1, 'area': 1}", unique = true)
 public final class Location {
 

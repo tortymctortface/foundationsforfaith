@@ -16,13 +16,13 @@ public class NewBuild extends Project{
     public NewBuild(String name, ProjectType projectType, Integer fundingRequired, Boolean siteAcquired){
         super(name, projectType, String.valueOf(ProgressStatus.NEW_PROJECT), fundingRequired);
         this.siteAcquired = siteAcquired;
-        this.expensiveBuild = super.expensiveProject(fundingRequired);
+        this.expensiveBuild = super.expensiveNewBuild(fundingRequired);
     }
 
     public NewBuild(String name, ProjectType projectType, Integer fundingRequired, Boolean siteAcquired, LocalDate date){
         super(name, projectType,String.valueOf(ProgressStatus.NEW_PROJECT), fundingRequired, date);
         this.siteAcquired = siteAcquired;
-        this.expensiveBuild = super.expensiveProject(fundingRequired);
+        this.expensiveBuild = super.expensiveNewBuild(fundingRequired);
     }
 
     public NewBuild(){

@@ -38,8 +38,7 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
     private MongoTemplate mongoTemplate;
 
     public ProjectUpdate createProjectUpdate(ProjectUpdateCreationDto projectUpdateCreationDto){
-        String safeProjectName = (Jsoup.clean(projectUpdateCreationDto.getProjectName(), Safelist.basic()));
-        Optional<Project> project = projectRepository.findProjectByProjectName(safeProjectName);
+        Optional<Project> project = projectRepository.findProjectByProjectName(projectUpdateCreationDto.getProjectName());
 
         if(project.isPresent()){
 
@@ -53,7 +52,7 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
             ProjectUpdate savedProjectUpdate = projectUpdateRepository.insert(projectUpdate);
 
             mongoTemplate.update(Project.class)
-                    .matching(Criteria.where("project_name").is(safeProjectName))
+                    .matching(Criteria.where("project_name").is(projectUpdateCreationDto.getProjectName()))
                     .apply(new Update().push("project_update_ids").value(savedProjectUpdate))
                     .first();
 

@@ -23,13 +23,7 @@ public class StoneController {
 
     @PostMapping("/create/stone")
     public ResponseEntity<?> createStone (@RequestBody StoneCreationDto stoneCreationDto){
-        try{
             return new ResponseEntity<Stone>(stoneService.createStoneToAssociateWithProject(stoneCreationDto), HttpStatus.CREATED);
-        } catch (
-        UnableToInsertException e){
-            return ResponseEntity.status(e.getErrorCode()).body(e.getMessage());
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+
     }
 }
