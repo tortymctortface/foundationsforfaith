@@ -1,12 +1,14 @@
 package com.edee.foundationsforfaith.controllers;
 
 import com.edee.foundationsforfaith.dtos.ProjectCreationDto;
+import com.edee.foundationsforfaith.dtos.ProjectStatsDto;
 import com.edee.foundationsforfaith.entities.NewBuild;
 import com.edee.foundationsforfaith.entities.Project;
 import com.edee.foundationsforfaith.repositories.ProjectRepository;
 import com.edee.foundationsforfaith.services.LocationService;
 import com.edee.foundationsforfaith.services.ProjectService;
 import com.edee.foundationsforfaith.services.ProjectUpdateService;
+import com.edee.foundationsforfaith.utils.StreamUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +64,13 @@ public class ProjectController {
         }catch (DuplicateKeyException duplicateKeyException){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Duplicate project name used. Error: " + duplicateKeyException.getMessage());
         }
+    }
+
+    @GetMapping("/projects/stats")
+    public ResponseEntity<ProjectStatsDto> getProjectStats() {
+        List<Project> projects = projectRepository.findAll();
+        ProjectStatsDto stats = StreamUtils.analyzeProjects(projects);
+        return ResponseEntity.ok(stats);
     }
 
 }
