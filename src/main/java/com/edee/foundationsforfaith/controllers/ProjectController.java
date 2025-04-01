@@ -1,9 +1,14 @@
 package com.edee.foundationsforfaith.controllers;
 
+import com.edee.foundationsforfaith.dtos.ProjectActionDto;
 import com.edee.foundationsforfaith.dtos.ProjectCreationDto;
 import com.edee.foundationsforfaith.dtos.ProjectStatsDto;
 import com.edee.foundationsforfaith.entities.NewBuild;
 import com.edee.foundationsforfaith.entities.Project;
+import com.edee.foundationsforfaith.entities.actions.CompleteProject;
+import com.edee.foundationsforfaith.entities.actions.PauseProject;
+import com.edee.foundationsforfaith.entities.actions.ProjectAction;
+import com.edee.foundationsforfaith.entities.actions.StartProject;
 import com.edee.foundationsforfaith.repositories.ProjectRepository;
 import com.edee.foundationsforfaith.services.LocationService;
 import com.edee.foundationsforfaith.services.ProjectService;
@@ -48,23 +53,22 @@ public class ProjectController {
         return new ResponseEntity<Optional<Project>>(projectRepository.findProjectByProjectName(safeProjectName), HttpStatus.OK);
     }
 
-    @PostMapping("/create/project/newBuild")
-    public ResponseEntity<?> createNewBuildProject (@RequestBody ProjectCreationDto projectCreationDto){
+    @PostMapping("/create/project")
+    public ResponseEntity<?> createProject(@RequestBody ProjectCreationDto dto) {
         try {
-            return new ResponseEntity<Project>(newBuildServiceImpl.createProject(projectCreationDto), HttpStatus.CREATED);
-        }catch (DuplicateKeyException duplicateKeyException){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Duplicate project name used. Error: " + duplicateKeyException.getMessage());
+            Project project = switch (dto.getProjectType()) {
+                case NEW_BUILD -> newBuildServiceImpl.createProject(dto);
+                case RENOVATION -> renovationServiceImpl.createProject(dto);
+            };
+
+            return new ResponseEntity<>(project, HttpStatus.CREATED);
+
+        } catch (DuplicateKeyException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Duplicate project name used. Error: " + e.getMessage());
         }
     }
 
-    @PostMapping("/create/project/renovation")
-    public ResponseEntity<?> createRenovationProject (@RequestBody ProjectCreationDto projectCreationDto){
-        try{
-            return new ResponseEntity<Project>(renovationServiceImpl.createProject(projectCreationDto), HttpStatus.CREATED);
-        }catch (DuplicateKeyException duplicateKeyException){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Duplicate project name used. Error: " + duplicateKeyException.getMessage());
-        }
-    }
 
     @GetMapping("/projects/stats")
     public ResponseEntity<ProjectStatsDto> getProjectStats() {
@@ -72,5 +76,7 @@ public class ProjectController {
         ProjectStatsDto stats = StreamUtils.analyzeProjects(projects);
         return ResponseEntity.ok(stats);
     }
+
+  
 
 }
