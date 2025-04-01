@@ -27,6 +27,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @Log4j2
 @Service
@@ -83,6 +87,26 @@ public class DonationServiceImpl implements DonationService {
         }else{
             throw new UnableToInsertException("Cannot process donation as a project with name "+ donationRecord.projectName()+ " does  not exist", HttpStatus.NOT_FOUND);
         }
+    }
+
+    public void demoFunctionalInterfaces() {
+        List<Donation> donations = donationRepository.findAll();
+
+        Consumer<Donation> logger = donation -> System.out.println("Donation: " + donation.getAmount());
+        donations.forEach(logger);
+
+        Predicate<Donation> isLargeDonation = donation -> donation.getAmount().compareTo(new BigDecimal("1000")) > 0;
+        List<Donation> largeDonations = donations.stream()
+                .filter(isLargeDonation)
+                .toList();
+
+        Supplier<Donation> donationSupplier = () -> new Donation(null, "John Doe", new BigDecimal("500"), null);
+        Donation newDonation = donationSupplier.get();
+        System.out.println("Generated donation: " + newDonation);
+
+        Function<Donation, String> formatDonation = d -> "Donor: " + d.getDonorName() + ", Amount: $" + d.getAmount();
+        List<String> formatted = donations.stream().map(formatDonation).toList();
+        formatted.forEach(System.out::println);
     }
 
     public DonationStatsDto getTotalDonations(String projectName){
