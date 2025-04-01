@@ -18,5 +18,6 @@ public class ProjectStatsDto {
     private Map<String, Integer> donationCountByProject;
     private int highDonationCount;
     private int lowDonationCount;
+    private Map<String, String> projectDurations;
 
 }

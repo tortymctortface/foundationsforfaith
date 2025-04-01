@@ -6,7 +6,9 @@ import com.edee.foundationsforfaith.entities.Stone;
 import com.edee.foundationsforfaith.entities.Donation;
 
 import java.math.BigDecimal;
+import java.time.Period;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class StreamUtils {
@@ -72,7 +74,16 @@ public class StreamUtils {
         int highDonationCount = partitioned.get(true).size();
         int lowDonationCount = partitioned.get(false).size();
 
-        // Return DTO
+        Map<String, String> projectDurations = projects.stream()
+                .filter(p -> p.getStartDate() != null && p.getEndDate() != null)
+                .collect(Collectors.toMap(
+                        Project::getName,
+                        p -> {
+                            Period duration = Period.between(p.getStartDate(), p.getEndDate());
+                            return String.format("%d months, %d days", duration.getMonths(), duration.getDays());
+                        }
+                ));
+
         ProjectStatsDto dto = new ProjectStatsDto();
         dto.setTotalStones(totalStones);
         dto.setStoneTypes(stoneTypes);
@@ -84,6 +95,7 @@ public class StreamUtils {
         dto.setDonationCountByProject(donationCountByProject);
         dto.setHighDonationCount(highDonationCount);
         dto.setLowDonationCount(lowDonationCount);
+        dto.setProjectDurations(projectDurations);
 
         return dto;
     }
