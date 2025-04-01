@@ -26,6 +26,9 @@ public class Donation {
     @Field("donation_amount")
     private Integer donationAmount;
 
+    @Field("large_donation")
+    private Boolean largeDonation;
+
     @Field("donation_creation_date")
     private LocalDate donationCreationDate = LocalDate.now();
 

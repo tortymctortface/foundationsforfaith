@@ -32,11 +32,8 @@ public class DonationController {
     @PostMapping("/create/donation")
     public ResponseEntity<?> processDonation (@RequestBody DonationDto donationDto){
         try{
-            log.info("length = " );
-
             DonationRecord donationRecord = new DonationRecord(donationDto.getDonorMessage(), donationDto.getDonationAmount(), donationDto.getProjectName(), donationDto.getStoneEmail());
-            log.info("length = " );
-            return new ResponseEntity<Donation>(donationService.donateAndAssociateWithProjectAndStone(donationRecord), HttpStatus.CREATED);
+            return new ResponseEntity<DonationDto>(donationService.donateAndAssociateWithProjectAndStone(donationRecord), HttpStatus.CREATED);
         } catch (
                 UnableToInsertException e){
             return ResponseEntity.status(e.getErrorCode()).body(e.getMessage());

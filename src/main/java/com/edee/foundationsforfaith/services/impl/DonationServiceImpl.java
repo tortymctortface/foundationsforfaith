@@ -1,5 +1,6 @@
 package com.edee.foundationsforfaith.services.impl;
 
+import com.edee.foundationsforfaith.dtos.DonationDto;
 import com.edee.foundationsforfaith.dtos.DonationStatsDto;
 import com.edee.foundationsforfaith.entities.Donation;
 import com.edee.foundationsforfaith.entities.Project;
@@ -50,63 +51,45 @@ public class DonationServiceImpl implements DonationService {
     @Autowired
     private ProjectService projectService;
 
+    private final Predicate<Donation> isValidDonation = d ->
+            d.getAmount() != null &&
+                    d.getDonorName() != null &&
+                    d.getAmount().compareTo(BigDecimal.ZERO) > 0;
 
-    public Donation donateAndAssociateWithProjectAndStone(DonationRecord donationRecord){
-        Optional<Project> project = projectRepository.findProjectByProjectName(donationRecord.projectName());
-        if(project.isPresent())
-        {
-            Optional<Stone> stone = stoneService.getStoneByEmail(donationRecord.stoneEmail());
-            if(stone.isPresent())
-            {
-                Donation donation = new Donation();
-                donation.setDonorMessage(Jsoup.clean(donationRecord.donorMessage(), Safelist.basic()));
-                donation.setDonationAmount(donationRecord.donationAmount());
-                donation.setProjectId(project.get().getProjectId().toString());
-                donation.setStoneId(stone.get().getStoneId().toString());
+    private final Supplier<RuntimeException> invalidDonationException = () ->
+            new IllegalArgumentException("Invalid donation data");
 
-                Donation savedDonation = donationRepository.insert(donation);
+    private final Consumer<Donation> logDonation = d ->
+            log.info("Processing donation from: " + d.getDonorName() + " for $" + d.getAmount());
 
-                mongoTemplate.update(Project.class)
-                        .matching(Criteria.where("project_name").is(donationRecord.projectName()))
-                        .apply(new Update()
-                                .inc("funding_acquired", donationRecord.donationAmount())
-                                .push("donation_ids").value(savedDonation))
-                        .first();
+    private final Function<Donation, DonationDto> donationToDto = d ->
+            new DonationDto(
+                    d.getId(),
+                    d.getAmount(),
+                    d.getDonorName(),
+                    d.getDateCreated()
+            );
 
-                mongoTemplate.update(Project.class)
-                        .matching(Criteria.where("email").is(donationRecord.stoneEmail()))
-                        .apply(new Update().push("donation_ids").value(savedDonation))
-                        .first();
 
-                log.info(donationRecord.thanks());
-                return savedDonation;
+    public DonationDto donateAndAssociateWithProjectAndStone(Donation donation){
+        Optional<Project> project = projectRepository.findProjectByProjectName(donation.projectName())
+                .isNotPresent(() -> new UnableToInsertException("Cannot process donation as a user with the email address : "+ donationRecord.stoneEmail() + " does not exist", HttpStatus.NOT_FOUND));
 
-            }else{
-                throw new UnableToInsertException("Cannot process donation as a user with the email address : "+ donationRecord.stoneEmail() + " does not exist", HttpStatus.NOT_FOUND);
-            }
-        }else{
-            throw new UnableToInsertException("Cannot process donation as a project with name "+ donationRecord.projectName()+ " does  not exist", HttpStatus.NOT_FOUND);
+        Optional<Stone> stone = stoneService.getStoneByEmail(donation.stoneEmail())
+                .isNotPresent(() ->  new UnableToInsertException("Cannot process donation as a project with name "+ donationRecord.projectName()+ " does  not exist", HttpStatus.NOT_FOUND));
+
+        if (!isValidDonation.test(donation)) {
+            throw invalidDonationException.get();
         }
-    }
 
-    public void demoFunctionalInterfaces() {
-        List<Donation> donations = donationRepository.findAll();
+        logDonation.accept(donation);
 
-        Consumer<Donation> logger = donation -> System.out.println("Donation: " + donation.getAmount());
-        donations.forEach(logger);
+        donation.setProject(project);
+        donation.setStone(stone);
 
-        Predicate<Donation> isLargeDonation = donation -> donation.getAmount().compareTo(new BigDecimal("1000")) > 0;
-        List<Donation> largeDonations = donations.stream()
-                .filter(isLargeDonation)
-                .toList();
+        Donation saved = donationRepository.save(donation);
 
-        Supplier<Donation> donationSupplier = () -> new Donation(null, "John Doe", new BigDecimal("500"), null);
-        Donation newDonation = donationSupplier.get();
-        System.out.println("Generated donation: " + newDonation);
-
-        Function<Donation, String> formatDonation = d -> "Donor: " + d.getDonorName() + ", Amount: $" + d.getAmount();
-        List<String> formatted = donations.stream().map(formatDonation).toList();
-        formatted.forEach(System.out::println);
+        return donationToDto.apply(saved);
     }
 
     public DonationStatsDto getTotalDonations(String projectName){
