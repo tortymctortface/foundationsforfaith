@@ -77,6 +77,23 @@ public class ProjectController {
         return ResponseEntity.ok(stats);
     }
 
-  
+    @PostMapping("/projects/action")
+    public ResponseEntity<String> actOnProject(@RequestBody ProjectActionDto dto) {
+        String safeProjectName = Jsoup.clean(dto.getProjectName(), Safelist.basic());
+        Project project = projectRepository.findProjectByProjectName(safeProjectName)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+
+        ProjectAction action = switch (dto.getType().toUpperCase()) {
+            case "START" -> new StartProject(project.getName());
+            case "PAUSE" -> new PauseProject(project.getName());
+            case "COMPLETE" -> new CompleteProject(project.getName());
+            default -> throw new IllegalArgumentException("Invalid action type");
+        };
+
+        projectActionHandler.handleAction(action, project);
+
+        return ResponseEntity.ok("Action recorded: " + dto.getType());
+    }
+
 
 }
