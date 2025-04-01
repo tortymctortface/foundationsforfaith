@@ -9,9 +9,10 @@ import com.edee.foundationsforfaith.entities.actions.CompleteProject;
 import com.edee.foundationsforfaith.entities.actions.PauseProject;
 import com.edee.foundationsforfaith.entities.actions.ProjectAction;
 import com.edee.foundationsforfaith.entities.actions.StartProject;
+import com.edee.foundationsforfaith.exceptions.UnableToInsertException;
 import com.edee.foundationsforfaith.repositories.ProjectRepository;
 import com.edee.foundationsforfaith.services.ProjectService;
-import com.edee.foundationsforfaith.utils.ProjectActionUtils;
+import com.edee.foundationsforfaith.services.ProjectUpdateService;
 import com.edee.foundationsforfaith.utils.StatisticUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
@@ -32,13 +33,17 @@ public class ProjectController {
     private final ProjectService newBuildServiceImpl;
     private final ProjectService renovationServiceImpl;
     private final ProjectRepository projectRepository;
+    private final ProjectUpdateService projectUpdateService;
     @Autowired
     public ProjectController(@Qualifier("newBuildServiceImpl") ProjectService newBuildServiceImpl,
                              @Qualifier("renovationServiceImpl") ProjectService renovationServiceImpl,
-                             ProjectRepository projectRepository) {
+                             ProjectRepository projectRepository,
+                             ProjectUpdateService projectUpdateService
+    ) {
         this.newBuildServiceImpl = newBuildServiceImpl;
         this.renovationServiceImpl = renovationServiceImpl;
         this.projectRepository = projectRepository;
+        this.projectUpdateService = projectUpdateService;
     }
 
     @GetMapping("/projects")
@@ -56,8 +61,9 @@ public class ProjectController {
     public ResponseEntity<?> createProject(@RequestBody ProjectCreationDto dto) {
         try {
             Project project = switch (dto.getProjectType()) {
-                case NEW_BUILD -> newBuildServiceImpl.createProject(dto);
-                case RENOVATION -> renovationServiceImpl.createProject(dto);
+                case  "NEW_BUILD" -> newBuildServiceImpl.createProject(dto);
+                case "RENOVATION" -> renovationServiceImpl.createProject(dto);
+                default -> throw new IllegalArgumentException("Invalid project type");
             };
 
             return new ResponseEntity<>(project, HttpStatus.CREATED);
@@ -87,16 +93,16 @@ public class ProjectController {
     public ResponseEntity<String> actOnProject(@RequestBody ProjectActionDto dto) {
         String safeProjectName = Jsoup.clean(dto.getProjectName(), Safelist.basic());
         Project project = projectRepository.findProjectByProjectName(safeProjectName)
-                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
 
         ProjectAction action = switch (dto.getType().toUpperCase()) {
-            case "START" -> new StartProject(project.getName());
-            case "PAUSE" -> new PauseProject(project.getName());
-            case "COMPLETE" -> new CompleteProject(project.getName());
+            case "START" -> new StartProject(project.getProjectName());
+            case "PAUSE" -> new PauseProject(project.getProjectName());
+            case "COMPLETE" -> new CompleteProject(project.getProjectName());
             default -> throw new IllegalArgumentException("Invalid action type");
         };
 
-        ProjectActionUtils.handleAction(action, project);
+        projectUpdateService.handleAction(action, project);
 
         return ResponseEntity.ok("Action recorded: " + dto.getType());
     }

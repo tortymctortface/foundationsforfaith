@@ -77,75 +77,89 @@ public class StatisticUtils {
 
     private static void computeStoneStats(List<Project> projects, ProjectStatsDto dto) {
         dto.setStoneCount(projects.stream()
-                .flatMap(p -> p.getStones().stream())
-                .count());
+                .mapToLong(p -> p.getStoneIds().size())
+                .sum());
 
         dto.setStoneTypes(projects.stream()
-                .flatMap(p -> p.getStones().stream())
-                .map(Stone::getType)
+                .flatMap(p -> p.getStoneIds().stream())
+                .map(Stone::getStoneType)
                 .distinct()
                 .sorted()
                 .collect(Collectors.toList()));
     }
 
     private static void computeDonationSummary(List<Project> projects, ProjectStatsDto dto) {
-        dto.setTotalDonationAmount(projects.stream()
-                .flatMap(p -> p.getDonations().stream())
-                .map(Donation::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        Optional<Float> sum = (projects.stream()
+        .flatMap(p -> p.getDonationIds().stream())
+        .map(Donation::getDonationAmount)
+        .reduce(Float::sum));
+        dto.setTotalDonations(sum.isEmpty() ? null : sum.get());
 
-        dto.setMinDonationAmount(projects.stream()
-                .flatMap(p -> p.getDonations().stream())
-                .map(Donation::getAmount)
-                .min(BigDecimal::compareTo)
-                .orElse(BigDecimal.ZERO));
+        dto.setMinDonation(projects.stream()
+                .flatMap(p -> p.getDonationIds().stream())
+                .map(Donation::getDonationAmount)
+                .min(Float::compareTo)
+                .orElse(null));
 
-        dto.setMaxDonationAmount(projects.stream()
-                .flatMap(p -> p.getDonations().stream())
-                .map(Donation::getAmount)
-                .max(BigDecimal::compareTo)
-                .orElse(BigDecimal.ZERO));
+        dto.setMaxDonation(projects.stream()
+                .flatMap(p -> p.getDonationIds().stream())
+                .map(Donation::getDonationAmount)
+                .min(Float::compareTo)
+                .orElse(null));
 
         Map<Boolean, List<Donation>> partitioned = projects.stream()
-                .flatMap(p -> p.getDonations().stream())
-                .collect(Collectors.partitioningBy(d -> d.getAmount().compareTo(new BigDecimal("500")) >= 0));
+                .flatMap(p -> p.getDonationIds().stream())
+                .collect(Collectors.partitioningBy(d -> d.getDonationAmount() >= 500.0f));
 
         dto.setHighDonationCount(partitioned.getOrDefault(true, List.of()).size());
         dto.setLowDonationCount(partitioned.getOrDefault(false, List.of()).size());
     }
 
     private static void computeDonorBreakdown(List<Project> projects, ProjectStatsDto dto) {
-        dto.setTopDonorList(projects.stream()
-                .flatMap(p -> p.getDonations().stream())
-                .filter(d -> d.getDonorName() != null)
-                .sorted((d1, d2) -> d2.getAmount().compareTo(d1.getAmount()))
+        dto.setTopDonors(projects.stream()
+                .flatMap(p -> p.getDonationIds().stream())
+                .filter(d -> d.getStoneId().getDonorName() != null)
+                .sorted((d1, d2) -> d2.getDonationAmount().compareTo(d1.getDonationAmount()))
                 .limit(5)
-                .map(d -> d.getDonorName() + ": $" + d.getAmount())
+                .map(d -> d.getStoneId().getDonorName() + ": €" + d.getDonationAmount())
                 .collect(Collectors.toList()));
 
-        dto.setDonationTotalsByDonor(projects.stream()
-                .flatMap(p -> p.getDonations().stream())
-                .filter(d -> d.getDonorName() != null)
-                .collect(Collectors.toMap(
-                        Donation::getDonorName,
-                        Donation::getAmount,
-                        BigDecimal::add
-                )));
+        dto.setTotalByDonor(
+            projects.stream()
+                    .flatMap(p -> p.getDonationIds().stream())
+                    .filter(d -> d.getStoneId().getDonorName() != null)
+                    .collect(Collectors.toMap(
+                            d -> d.getStoneId().getDonorName(),
+                            Donation::getDonationAmount,
+                            Float::sum
+                    ))
+        );
+
     }
 
     private static void computeProjectStats(List<Project> projects, ProjectStatsDto dto) {
-        dto.setDonationCountPerProject(projects.stream()
+        dto.setDonationCountByProject(projects.stream()
                 .collect(Collectors.toMap(
-                        Project::getName,
-                        p -> p.getDonations().size()
+                        Project::getProjectName,
+                        p -> p.getDonationIds().size()
                 )));
 
-        dto.setProjectDurationMap(projects.stream()
-                .filter(p -> p.getStartDate() != null && p.getEndDate() != null)
+        dto.setDonationsByProject(
+                projects.stream()
+                        .collect(Collectors.toMap(
+                                Project::getProjectName,
+                                p -> p.getDonationIds().stream()
+                                        .map(Donation::getDonationAmount)
+                                        .reduce(0.0f, Float::sum)
+                        ))
+        );
+
+        dto.setProjectDurations(projects.stream()
+                .filter(p -> p.getProjectCreatedDate() != null && p.getProjectBuildStartDate() != null)
                 .collect(Collectors.toMap(
-                        Project::getName,
+                        Project::getProjectName,
                         p -> {
-                            Period duration = Period.between(p.getStartDate(), p.getEndDate());
+                            Period duration = Period.between(p.getProjectCreatedDate(), p.getProjectBuildStartDate());
                             return String.format("%d months, %d days", duration.getMonths(), duration.getDays());
                         }
                 )));
@@ -153,33 +167,36 @@ public class StatisticUtils {
 
     private static void mergeDtos(ProjectStatsDto target, ProjectStatsDto... sources) {
         for (ProjectStatsDto src : sources) {
-            if (!src.getStoneCount().isEmpty()) target.setStoneCount(src.getStoneCount());
+            if (src.getStoneCount()!=null) target.setStoneCount(src.getStoneCount());
             if (src.getStoneTypes() != null) target.setStoneTypes(src.getStoneTypes());
-            if (src.getTotalDonationAmount() != null) target.setTotalDonationAmount(src.getTotalDonationAmount());
-            if (src.getMinDonationAmount() != null) target.setMinDonationAmount(src.getMinDonationAmount());
-            if (src.getMaxDonationAmount() != null) target.setMaxDonationAmount(src.getMaxDonationAmount());
+            if (src.getTotalDonations() != null) target.setTotalDonations(src.getTotalDonations());
+            if (src.getMinDonation() != null) target.setMinDonation(src.getMinDonation());
+            if (src.getMaxDonation() != null) target.setMaxDonation(src.getMaxDonation());
             if (src.getHighDonationCount() != 0) target.setHighDonationCount(src.getHighDonationCount());
             if (src.getLowDonationCount() != 0) target.setLowDonationCount(src.getLowDonationCount());
-            if (src.getTopDonorList() != null) target.setTopDonorList(src.getTopDonorList());
-            if (src.getDonationTotalsByDonor() != null) target.setDonationTotalsByDonor(src.getDonationTotalsByDonor());
-            if (src.getDonationCountPerProject() != null) target.setDonationCountPerProject(src.getDonationCountPerProject());
-            if (src.getProjectDurationMap() != null) target.setProjectDurationMap(src.getProjectDurationMap());
+            if (src.getTopDonors() != null) target.setTopDonors(src.getTopDonors());
+            if (src.getTotalByDonor() != null) target.setTotalByDonor(src.getTotalByDonor());
+            if (src.getDonationCountByProject() != null) target.setDonationCountByProject(src.getDonationCountByProject());
+            if (src.getDonationsByProject() !=null) target.setDonationsByProject(src.getDonationsByProject());
+            if (src.getProjectDurations() != null) target.setProjectDurations(src.getProjectDurations());
         }
     }
 
     public static List<ProjectDonationTotalDto> sortProjectsByDonation(List<Project> projects) {
         return projects.stream()
-                .sorted(Comparator.comparing(project ->
-                        project.getDonations().stream()
+                .sorted(Comparator.comparingDouble((Project project) ->
+                        project.getDonationIds().stream()
                                 .map(Donation::getDonationAmount)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                ).reversed())
+                                .reduce(0.0f, Float::sum)
+                ).reversed()) // Sort by total donation amount (high to low)
                 .map(p -> new ProjectDonationTotalDto(
                         p.getProjectName(),
                         p.getDonationIds().stream()
                                 .map(Donation::getDonationAmount)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                                .reduce(0.0f, Float::sum)
                 ))
                 .collect(Collectors.toList());
     }
+
+
 }

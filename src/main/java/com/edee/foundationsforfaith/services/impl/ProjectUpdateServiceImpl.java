@@ -4,6 +4,11 @@ import com.edee.foundationsforfaith.dtos.ProjectUpdateCreationDto;
 import com.edee.foundationsforfaith.entities.Location;
 import com.edee.foundationsforfaith.entities.Project;
 import com.edee.foundationsforfaith.entities.ProjectUpdate;
+import com.edee.foundationsforfaith.entities.actions.CompleteProject;
+import com.edee.foundationsforfaith.entities.actions.PauseProject;
+import com.edee.foundationsforfaith.entities.actions.ProjectAction;
+import com.edee.foundationsforfaith.entities.actions.StartProject;
+import com.edee.foundationsforfaith.enums.ProgressStatus;
 import com.edee.foundationsforfaith.enums.ProjectType;
 import com.edee.foundationsforfaith.enums.ProjectUpdateType;
 import com.edee.foundationsforfaith.exceptions.UnableToInsertException;
@@ -22,6 +27,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.edee.foundationsforfaith.enums.ProjectUpdateType.GENERAL_UPDATE;
@@ -61,6 +67,41 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
         }else{
             throw new UnableToInsertException("Cannot add project update as project with"+projectUpdateCreationDto.getProjectName()+"does  not exist", HttpStatus.NOT_FOUND);
         }
+    }
+
+    public void handleAction(ProjectAction action, Project project) {
+        String description;
+        switch (action) {
+            case StartProject s -> {
+                project.setProjectStatus(ProgressStatus.BUILD_IN_PROGRESS);
+                description = "The build of  "+project.getProjectName() + " is in progress. Date: " + LocalDateTime.now();
+            }
+            case PauseProject p -> {
+                if (!ProgressStatus.BUILD_IN_PROGRESS.equals(project.getProjectStatus())) {
+                    throw new IllegalStateException("Project must be in progress to pause.");
+                }
+                project.setProjectStatus(ProgressStatus.BUILD_PAUSED);
+                description = "The build of  "+project.getProjectName() + " has been paused. We will update you once it re-starts. Date: " + LocalDateTime.now();
+            }
+            case CompleteProject c -> {
+                if (!ProgressStatus.BUILD_IN_PROGRESS.equals(project.getProjectStatus())) {
+                    throw new IllegalStateException("Only in-progress projects can be completed.");
+                }
+                project.setProjectStatus(ProgressStatus.BUILD_COMPLETE);
+                description = "The build of  "+project.getProjectName() + " has been completed. We will update you with pictures soon! Date: " + LocalDateTime.now();
+            }
+            default -> throw new IllegalStateException("Unknown project action");
+        }
+
+        ProjectUpdate update = new ProjectUpdate();
+        update.setProjectUpdateType(ProjectUpdateType.PROJECT_CHANGING_STATUS);
+        update.setDescription(description);
+        update.setEmailAllStones(true);
+        ProjectUpdate updated = projectUpdateRepository.save(update);
+
+        // Persist changes to project
+        project.getProjectUpdateIds().add(updated);
+        projectRepository.save(project);
     }
 
 }

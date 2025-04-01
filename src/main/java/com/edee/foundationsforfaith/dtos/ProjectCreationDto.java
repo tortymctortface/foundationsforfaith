@@ -14,7 +14,7 @@ public class ProjectCreationDto {
     private String area;
     private String projectName;
     private String projectDescription;
-    private ProjectType projectType;
+    private String projectType;
     private String projectStatus;
     private Integer amountOfFundingRequired;
     private Integer buildingAgeInYears;

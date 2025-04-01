@@ -11,5 +11,5 @@ import java.math.BigDecimal;
 @Data
 public class ProjectDonationTotalDto {
     private String projectName;
-    private BigDecimal totalDonations;
+    private Float totalDonations;
 }

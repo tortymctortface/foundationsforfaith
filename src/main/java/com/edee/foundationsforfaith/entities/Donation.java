@@ -24,7 +24,7 @@ public class Donation {
     private String donorMessage;
 
     @Field("donation_amount")
-    private Integer donationAmount;
+    private Float donationAmount;
 
     @Field("large_donation")
     private Boolean largeDonation;
@@ -36,6 +36,6 @@ public class Donation {
     private String projectId;
 
     @Field("stone_id")
-    private String stoneId;
+    private Stone stoneId;
 
 }

@@ -1,5 +1,6 @@
 package com.edee.foundationsforfaith.entities;
 
+import com.edee.foundationsforfaith.enums.StoneType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,5 +38,8 @@ public class Stone {
 
     @Field("donation_ids")
     private List<String> donationIds;
+
+    @Field("stone_type")
+    private StoneType stoneType;
 
 }
