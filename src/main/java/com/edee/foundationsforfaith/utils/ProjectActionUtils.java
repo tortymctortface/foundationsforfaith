@@ -20,7 +20,7 @@ public class ProjectActionUtils{
         this.projectRepository = projects;
     }
 
-    public void handleAction(ProjectAction action, Project project) {
+    public static void handleAction(ProjectAction action, Project project) {
         String description;
         switch (action) {
             case StartProject s -> {

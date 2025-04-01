@@ -55,13 +55,13 @@ public class Project {
     private boolean completed;
 
     @Field("stone_ids")
-    private  List<String> stoneIds;
+    private  List<Stone> stoneIds;
 
     @Field("project_update_ids")
     private List<ProjectUpdate> projectUpdateIds;
 
     @Field("donation_ids")
-    private  List<String>  donationIds;
+    private  List<Donation>  donationIds;
 
     public Project (String name, ProjectType type, String status, Integer fundingRequired){
         this(name, type, status,fundingRequired, LocalDate.now());

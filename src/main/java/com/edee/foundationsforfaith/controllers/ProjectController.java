@@ -2,18 +2,17 @@ package com.edee.foundationsforfaith.controllers;
 
 import com.edee.foundationsforfaith.dtos.ProjectActionDto;
 import com.edee.foundationsforfaith.dtos.ProjectCreationDto;
+import com.edee.foundationsforfaith.dtos.ProjectDonationTotalDto;
 import com.edee.foundationsforfaith.dtos.ProjectStatsDto;
-import com.edee.foundationsforfaith.entities.NewBuild;
 import com.edee.foundationsforfaith.entities.Project;
 import com.edee.foundationsforfaith.entities.actions.CompleteProject;
 import com.edee.foundationsforfaith.entities.actions.PauseProject;
 import com.edee.foundationsforfaith.entities.actions.ProjectAction;
 import com.edee.foundationsforfaith.entities.actions.StartProject;
 import com.edee.foundationsforfaith.repositories.ProjectRepository;
-import com.edee.foundationsforfaith.services.LocationService;
 import com.edee.foundationsforfaith.services.ProjectService;
-import com.edee.foundationsforfaith.services.ProjectUpdateService;
-import com.edee.foundationsforfaith.utils.StreamUtils;
+import com.edee.foundationsforfaith.utils.ProjectActionUtils;
+import com.edee.foundationsforfaith.utils.StatisticUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,8 +72,15 @@ public class ProjectController {
     @GetMapping("/projects/stats")
     public ResponseEntity<ProjectStatsDto> getProjectStats() {
         List<Project> projects = projectRepository.findAll();
-        ProjectStatsDto stats = StreamUtils.analyzeProjects(projects);
+        ProjectStatsDto stats = StatisticUtils.analyzeProjects(projects);
         return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/projects/stats/concurrent")
+    public ResponseEntity<ProjectStatsDto> getConcurrentStats() throws Exception {
+        List<Project> projects = projectRepository.findAll();
+        ProjectStatsDto dto = StatisticUtils.analyzeProjectsConcurrent(projects);
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/projects/action")
@@ -90,9 +96,16 @@ public class ProjectController {
             default -> throw new IllegalArgumentException("Invalid action type");
         };
 
-        projectActionHandler.handleAction(action, project);
+        ProjectActionUtils.handleAction(action, project);
 
         return ResponseEntity.ok("Action recorded: " + dto.getType());
+    }
+
+    @GetMapping("/projects/sorted-by-donations")
+    public ResponseEntity<List<ProjectDonationTotalDto>> getProjectsSortedByDonations() {
+        List<Project> projects = projectRepository.findAll();
+        List<ProjectDonationTotalDto> sorted = StatisticUtils.sortProjectsByDonation(projects);
+        return ResponseEntity.ok(sorted);
     }
 
 
