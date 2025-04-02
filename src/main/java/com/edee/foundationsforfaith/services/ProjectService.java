@@ -10,20 +10,22 @@ public interface ProjectService {
     Project createProject(ProjectCreationDto projectCreationDto);
     Project getDefensiveProjectByProjectName(String projectName);
 
-    default double getAverageRating(int... donations) {
+    default float getAverageRating(float... donations) {
         if (donations == null || donations.length == 0) {
-            return 0.0;
+            return 0.0f;
         }
         return calculateAverage(donations);
     }
 
-    private double calculateAverage(int... donations) {
-        int total = Arrays.stream(donations).sum();
-        int length = donations.length;
-        return total/length;
+    private float calculateAverage(float... donations) {
+        float total = 0;
+        for (float d : donations) {
+            total += d;
+        }
+        return donations.length == 0 ? 0 : total / donations.length;
     }
 
-    static boolean isValidDonationAmount(int amount) {
+    static boolean isValidDonationAmount(float amount) {
         return amount >= 1;
     }
 

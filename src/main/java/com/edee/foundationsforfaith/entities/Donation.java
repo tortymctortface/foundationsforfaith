@@ -33,7 +33,7 @@ public class Donation {
     private LocalDate donationCreationDate = LocalDate.now();
 
     @Field("project_id")
-    private String projectId;
+    private Project projectId;
 
     @Field("stone_id")
     private Stone stoneId;

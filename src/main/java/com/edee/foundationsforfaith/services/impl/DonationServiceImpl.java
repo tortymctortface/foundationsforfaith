@@ -14,20 +14,16 @@ import com.edee.foundationsforfaith.services.DonationService;
 import com.edee.foundationsforfaith.services.ProjectService;
 import com.edee.foundationsforfaith.services.StoneService;
 import lombok.extern.log4j.Log4j2;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -52,40 +48,50 @@ public class DonationServiceImpl implements DonationService {
     private ProjectService projectService;
 
     private final Predicate<Donation> isValidDonation = d ->
-            d.getAmount() != null &&
-                    d.getDonorName() != null &&
-                    d.getAmount().compareTo(BigDecimal.ZERO) > 0;
+            d.getDonationAmount() != null &&
+                    d.getStoneId().getDonorName() != null &&
+                    d.getDonationAmount().compareTo(0.0f) > 0;
 
     private final Supplier<RuntimeException> invalidDonationException = () ->
             new IllegalArgumentException("Invalid donation data");
 
     private final Consumer<Donation> logDonation = d ->
-            log.info("Processing donation from: " + d.getDonorName() + " for $" + d.getAmount());
+            log.info("Processing donation from: " + d.getStoneId().getDonorName() + " for $" + d.getDonationAmount());
 
     private final Function<Donation, DonationDto> donationToDto = d ->
             new DonationDto(
-                    d.getId(),
-                    d.getAmount(),
-                    d.getDonorName(),
-                    d.getDateCreated()
+                    d.getProjectId().getProjectName(),
+                    d.getDonationAmount(),
+                    d.getStoneId().getDonorName(),
+                    d.getStoneId().getEmail()
             );
 
 
-    public DonationDto donateAndAssociateWithProjectAndStone(Donation donation){
-        Optional<Project> project = projectRepository.findProjectByProjectName(donation.projectName())
-                .isNotPresent(() -> new UnableToInsertException("Cannot process donation as a user with the email address : "+ donationRecord.stoneEmail() + " does not exist", HttpStatus.NOT_FOUND));
+    public DonationDto donateAndAssociateWithProjectAndStone(DonationRecord donationRecord){
+        Project project = projectRepository.findProjectByProjectName(donationRecord.projectName())
+                .orElseThrow(() -> new UnableToInsertException(
+                        "Cannot process donation as a user with the email address: " + donationRecord.projectName() + " does not exist.",
+                        HttpStatus.NOT_FOUND
+                ));
 
-        Optional<Stone> stone = stoneService.getStoneByEmail(donation.stoneEmail())
-                .isNotPresent(() ->  new UnableToInsertException("Cannot process donation as a project with name "+ donationRecord.projectName()+ " does  not exist", HttpStatus.NOT_FOUND));
+        Stone stone = stoneRepository.findStoneByEmail(donationRecord.stoneEmail())
+                .orElseThrow(() -> new UnableToInsertException(
+                        "Cannot process donation as a donor with email "+ donationRecord.stoneEmail()+ " does  not exist",
+                        HttpStatus.NOT_FOUND
+                ));
+
+        Donation donation = new Donation();
+        donation.setStoneId(stone);
+        donation.setProjectId(project);
+        donation.setDonationAmount(donationRecord.donationAmount());
+        donation.setDonationCreationDate(LocalDate.now());
+        donation.setDonorMessage(donationRecord.donorMessage());
 
         if (!isValidDonation.test(donation)) {
             throw invalidDonationException.get();
         }
 
         logDonation.accept(donation);
-
-        donation.setProject(project);
-        donation.setStone(stone);
 
         Donation saved = donationRepository.save(donation);
 
@@ -105,9 +111,9 @@ public class DonationServiceImpl implements DonationService {
     }
 
     private DonationStatsDto getDonationStats (List<Donation> donations, Project project){
-        Integer totalDonationAmount = 0;
+        Float totalDonationAmount = 0f;
         int index = 0;
-        int[] donationAmounts = new int[donations.size()];
+        float[] donationAmounts = new float[donations.size()];
         for(var donation : donations){
             if(ProjectService.isValidDonationAmount(donation.getDonationAmount())) {
                 totalDonationAmount += donation.getDonationAmount();
@@ -122,9 +128,9 @@ public class DonationServiceImpl implements DonationService {
         return donationStatsDto;
     }
 
-    public void getAverageDonationAmountPerProject(DonationStatsDto donationStatsDto, int[] donations){
+    public void getAverageDonationAmountPerProject(DonationStatsDto donationStatsDto, float[] donations){
         // Calling the default method
-        double averageRating = projectService.getAverageRating(donations);
+        float averageRating = projectService.getAverageRating(donations);
         log.info("length = " + donations.length);
         log.info("length = " + Arrays.toString(donations));
         donationStatsDto.setProjectAverageDonation(averageRating);

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class DonationDto {
     private String donorMessage;
-    private Integer donationAmount;
+    private Float donationAmount;
     private String projectName;
     private String stoneEmail;
 }

@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class DonationStatsDto {
-    private int projectFunding;
-    private double projectAverageDonation;
+    private float projectFunding;
+    private float projectAverageDonation;
     private String userMessage;
 
-    public void setUserMessage(String projectName, Integer fundingAcquired, Integer amountOfFundingRequired) {
+    public void setUserMessage(String projectName, float fundingAcquired, float amountOfFundingRequired) {
         this.userMessage = projectName + " has had a total amount of funding of : "+fundingAcquired+" throughout its whole lifecycle. It requires "+amountOfFundingRequired+" to be fully funded.";
     }
 }
