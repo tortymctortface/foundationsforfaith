@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -88,9 +89,11 @@ public class ReportUtils {
     }
 
     public static List<String> buildLocalizedReport(Project project, Locale locale) {
-        var msg = LocalizationUtils::format;
-
-        long totalStones = project.getStoneIds().size();
+        long donorCount = project.getDonationIds().stream()
+                .filter(d -> d.getStoneId().getDonorName() != null)
+                .map(d -> d.getStoneId().getDonorName())
+                .distinct()
+                .count();
 
         Float totalDonations = project.getDonationIds().stream()
                 .map(Donation::getDonationAmount)
@@ -98,30 +101,24 @@ public class ReportUtils {
 
         List<String> topDonors = project.getDonationIds().stream()
                 .filter(d -> d.getStoneId().getDonorName() != null)
-                .sorted((d1, d2) -> d2.getDonationAmount().compareTo(d1.getDonationAmount()))
+                .sorted(Comparator.comparing(Donation::getDonationAmount).reversed())
                 .limit(5)
-                .map(d -> d.getStoneId().getDonorName() + ": €" + d.getDonationAmount()).toList();
+                .map(d -> d.getStoneId().getDonorName() + ": €" + d.getDonationAmount())
+                .toList();
 
         String duration = (project.getProjectCreatedDate() != null && project.getProjectBuildStartDate() != null)
                 ? formatPeriod(project.getProjectCreatedDate(), project.getProjectBuildStartDate())
                 : "N/A";
 
-        List<String> reportLines = List.of(
-                "=== Project Report: " + project.getProjectName() + " ===",
-                "Total Stones: " + totalStones,
-                "Total Donations: $" + totalDonations,
-                "Top Donors: " + topDonors,
-                "Duration: " + duration
-        );
-
         return List.of(
-                msg.apply("project.report.title", locale, project.getProjectName()),
-                msg.apply("project.report.donors", locale, totalStones),
-                msg.apply("project.report.donations", locale, totalDonations),
-                msg.apply("project.report.topDonors", locale, topDonors),
-                msg.apply("project.report.duration", locale, duration)
+                LocalizationUtils.format("project.report.title", locale, project.getProjectName()),
+                LocalizationUtils.format("project.report.donors", locale, donorCount),
+                LocalizationUtils.format("project.report.donations", locale, totalDonations),
+                LocalizationUtils.format("project.report.topDonors", locale, topDonors),
+                LocalizationUtils.format("project.report.duration", locale, duration)
         );
     }
+
 
     private static String formatPeriod(LocalDate start, LocalDate end) {
         Period period = Period.between(start, end);
