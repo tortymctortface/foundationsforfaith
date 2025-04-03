@@ -12,8 +12,8 @@ import java.util.Map;
 @NoArgsConstructor
 @Data
 public class ProjectStatsDto {
-    private List<StoneType> stoneTypes;
-    private Long stoneCount;
+    private List<StoneType> donorTypes;
+    private Long numberOfDonors;
     private Float totalDonations;
     private List<String> topDonors;
     private Float minDonation;

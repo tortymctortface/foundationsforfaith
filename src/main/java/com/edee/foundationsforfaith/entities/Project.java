@@ -46,10 +46,10 @@ public class Project {
     private ProgressStatus projectStatus;
 
     @Field("amount_of_funding_required")
-    private Integer amountOfFundingRequired;
+    private Float amountOfFundingRequired;
 
     @Field("funding_acquired")
-    private Integer fundingAcquired;
+    private Float fundingAcquired;
 
     @Field("project_build_start_date")
     private LocalDate projectBuildStartDate;
@@ -67,16 +67,16 @@ public class Project {
     @JsonIgnore
     private List<DonationDto> donationIds;
 
-    public Project (String name, ProjectType type, String status, Integer fundingRequired){
+    public Project (String name, ProjectType type, String status, float fundingRequired){
         this(name, type, status,fundingRequired, LocalDate.now());
     }
-    public Project (ObjectId id, String name, ProjectType type, Integer fundingRequired){
+    public Project (ObjectId id, String name, ProjectType type, float fundingRequired){
         this.projectId = id;
         this.projectName = name;
         this.projectType = type;
         this.amountOfFundingRequired = fundingRequired;
     }
-    public Project (String name, ProjectType type, String status, Integer fundingRequired, LocalDate projectCreatedDate){
+    public Project (String name, ProjectType type, String status, float fundingRequired, LocalDate projectCreatedDate){
         this.projectName = name;
         this.projectCreatedDate = projectCreatedDate;
         this.projectType = type;

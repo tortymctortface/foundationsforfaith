@@ -110,6 +110,7 @@ public class DonationServiceImpl implements DonationService {
         }
         projectsDonations.add(donationToDto.apply(saved));
         project.setDonationIds(projectsDonations);
+        project.setFundingAcquired(project.getFundingAcquired() == null ? donation.getDonationAmount() : project.getFundingAcquired() + donation.getDonationAmount());
         projectRepository.save(project);
 
         return donationToDto.apply(saved);

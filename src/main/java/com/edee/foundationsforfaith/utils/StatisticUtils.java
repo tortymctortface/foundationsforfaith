@@ -5,10 +5,8 @@ import com.edee.foundationsforfaith.dtos.ProjectDonationTotalDto;
 import com.edee.foundationsforfaith.dtos.ProjectStatsDto;
 import com.edee.foundationsforfaith.entities.Project;
 import com.edee.foundationsforfaith.entities.Stone;
-import com.edee.foundationsforfaith.entities.Donation;
 import lombok.extern.log4j.Log4j2;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.Period;
@@ -77,11 +75,11 @@ public class StatisticUtils {
     }
 
     private static void computeStoneStats(List<Project> projects, ProjectStatsDto dto) {
-        dto.setStoneCount(projects.stream()
+        dto.setNumberOfDonors(projects.stream()
                 .mapToLong(p -> p.getStoneIds().size())
                 .sum());
 
-        dto.setStoneTypes(projects.stream()
+        dto.setDonorTypes(projects.stream()
                 .flatMap(p -> p.getStoneIds().stream())
                 .map(Stone::getStoneType)
                 .distinct()
@@ -117,8 +115,8 @@ public class StatisticUtils {
                 .flatMap(p -> p.getDonationIds().stream())
                 .collect(Collectors.partitioningBy(d -> d.getDonationAmount() >= 500.0f));
 
-        dto.setHighDonationCount(partitioned.getOrDefault(true, List.of()).size());
-        dto.setLowDonationCount(partitioned.getOrDefault(false, List.of()).size());
+        dto.setHighDonationCount(partitioned.getOrDefault(true, Collections.emptyList()).size());
+        dto.setLowDonationCount(partitioned.getOrDefault(false, Collections.emptyList()).size());
     }
 
     private static void computeDonorBreakdown(List<Project> projects, ProjectStatsDto dto) {
@@ -170,15 +168,15 @@ public class StatisticUtils {
                         Project::getProjectName,
                         p -> {
                             Period duration = Period.between(p.getProjectCreatedDate(), p.getProjectBuildStartDate());
-                            return String.format("%d months, %d days", duration.getMonths(), duration.getDays());
+                            return String.format("%d years, %d months, %d days",duration.getYears(), duration.getMonths(), duration.getDays());
                         }
                 )));
     }
 
     private static void mergeDtos(ProjectStatsDto target, ProjectStatsDto... sources) {
         for (ProjectStatsDto src : sources) {
-            if (src.getStoneCount()!=null) target.setStoneCount(src.getStoneCount());
-            if (src.getStoneTypes() != null) target.setStoneTypes(src.getStoneTypes());
+            if (src.getNumberOfDonors()!=null) target.setNumberOfDonors(src.getNumberOfDonors());
+            if (src.getDonorTypes() != null) target.setDonorTypes(src.getDonorTypes());
             if (src.getTotalDonations() != null) target.setTotalDonations(src.getTotalDonations());
             if (src.getMinDonation() != null) target.setMinDonation(src.getMinDonation());
             if (src.getMaxDonation() != null) target.setMaxDonation(src.getMaxDonation());

@@ -120,6 +120,11 @@ public class ProjectController {
             default -> throw new IllegalArgumentException("Invalid action type");
         };
 
+        try{
+            projectUpdateService.handleAction(action, project);
+        } catch (Exception e) {
+
+        }
         projectUpdateService.handleAction(action, project);
 
         return ResponseEntity.ok("Action recorded: " + dto.getType());
