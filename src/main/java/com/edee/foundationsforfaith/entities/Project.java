@@ -1,9 +1,11 @@
 package com.edee.foundationsforfaith.entities;
 
 import com.edee.foundationsforfaith.constants.ApplicationConstants;
+import com.edee.foundationsforfaith.dtos.DonationDto;
 import com.edee.foundationsforfaith.enums.ProjectType;
 import com.edee.foundationsforfaith.enums.ProgressStatus;
 import com.edee.foundationsforfaith.utils.CalculationUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,13 +57,15 @@ public class Project {
     private boolean completed;
 
     @Field("stone_ids")
+    @JsonIgnore
     private  List<Stone> stoneIds;
 
     @Field("project_update_ids")
     private List<ProjectUpdate> projectUpdateIds;
 
     @Field("donation_ids")
-    private  List<Donation>  donationIds;
+    @JsonIgnore
+    private List<DonationDto> donationIds;
 
     public Project (String name, ProjectType type, String status, Integer fundingRequired){
         this(name, type, status,fundingRequired, LocalDate.now());

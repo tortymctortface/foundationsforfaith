@@ -6,15 +6,17 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+
+
 @Data
 @Document(collection = "projects")
 public class Renovation extends Project{
 
-    private final Integer buildingAgeInYears;
+    private Integer buildingAgeInYears;
 
-    private final Boolean previouslyCompletedProject;
+    private Boolean previouslyCompletedProject;
 
-    private final Boolean expensiveRenovation;
+    private Boolean expensiveRenovation;
 
     public Renovation(String name, ProjectType projectType, String progressStatus, Integer fundingRequired, Integer buildingAgeInYears, Boolean previouslyCompletedProject){
         super(name, projectType, progressStatus, fundingRequired);

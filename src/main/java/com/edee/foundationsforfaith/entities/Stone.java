@@ -1,6 +1,8 @@
 package com.edee.foundationsforfaith.entities;
 
+import com.edee.foundationsforfaith.dtos.DonationDto;
 import com.edee.foundationsforfaith.enums.StoneType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,10 +36,12 @@ public class Stone {
     private Boolean sendUpdatesToDonor;
 
     @Field("project_ids")
+    @JsonIgnore
     private List<Project> projectIds;
 
     @Field("donation_ids")
-    private List<Donation> donationIds;
+    @JsonIgnore
+    private List<DonationDto> donationIds;
 
     @Field("stone_type")
     private StoneType stoneType;

@@ -4,5 +4,10 @@ public enum StoneType {
 
     ANONYMOUS,
     PRIVATE,
-    CORPORATE
+    CORPORATE,
+    ALLY,
+    BENEFACTOR,
+    SPONSOR,
+    SUPPORTER,
+    PARTNER
 }

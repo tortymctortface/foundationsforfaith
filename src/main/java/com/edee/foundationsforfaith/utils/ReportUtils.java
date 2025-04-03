@@ -1,5 +1,6 @@
 package com.edee.foundationsforfaith.utils;
 
+import com.edee.foundationsforfaith.dtos.DonationDto;
 import com.edee.foundationsforfaith.entities.Donation;
 import com.edee.foundationsforfaith.entities.Project;
 import lombok.extern.log4j.Log4j2;
@@ -27,14 +28,14 @@ public class ReportUtils {
         long totalStones = project.getStoneIds().size();
 
         Float totalDonations = project.getDonationIds().stream()
-                .map(Donation::getDonationAmount)
+                .map(DonationDto::getDonationAmount)
                 .reduce(0.0f, Float::sum);
 
         List<String> topDonors = project.getDonationIds().stream()
-                .filter(d -> d.getStoneId().getDonorName() != null)
+                .filter(d -> d.getStoneEmail() != null)
                 .sorted((d1, d2) -> d2.getDonationAmount().compareTo(d1.getDonationAmount()))
                 .limit(5)
-                .map(d -> d.getStoneId().getDonorName() + ": €" + d.getDonationAmount()).toList();
+                .map(d -> d.getStoneEmail() + ": €" + d.getDonationAmount()).toList();
 
         String duration = (project.getProjectCreatedDate() != null && project.getProjectBuildStartDate() != null)
                 ? formatPeriod(project.getProjectCreatedDate(), project.getProjectBuildStartDate())
@@ -90,20 +91,20 @@ public class ReportUtils {
 
     public static List<String> buildLocalizedReport(Project project, Locale locale) {
         long donorCount = project.getDonationIds().stream()
-                .filter(d -> d.getStoneId().getDonorName() != null)
-                .map(d -> d.getStoneId().getDonorName())
+                .filter(d -> d.getStoneEmail() != null)
+                .map(d -> d.getStoneEmail())
                 .distinct()
                 .count();
 
         Float totalDonations = project.getDonationIds().stream()
-                .map(Donation::getDonationAmount)
+                .map(DonationDto::getDonationAmount)
                 .reduce(0.0f, Float::sum);
 
         List<String> topDonors = project.getDonationIds().stream()
-                .filter(d -> d.getStoneId().getDonorName() != null)
-                .sorted(Comparator.comparing(Donation::getDonationAmount).reversed())
+                .filter(d -> d.getStoneEmail() != null)
+                .sorted(Comparator.comparing(DonationDto::getDonationAmount).reversed())
                 .limit(5)
-                .map(d -> d.getStoneId().getDonorName() + ": €" + d.getDonationAmount())
+                .map(d -> d.getStoneEmail() + ": €" + d.getDonationAmount())
                 .toList();
 
         String duration = (project.getProjectCreatedDate() != null && project.getProjectBuildStartDate() != null)

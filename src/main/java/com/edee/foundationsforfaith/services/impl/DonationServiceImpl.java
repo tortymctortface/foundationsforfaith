@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -70,7 +71,7 @@ public class DonationServiceImpl implements DonationService {
     public DonationDto donateAndAssociateWithProjectAndStone(DonationRecord donationRecord){
         Project project = projectRepository.findProjectByProjectName(donationRecord.projectName())
                 .orElseThrow(() -> new UnableToInsertException(
-                        "Cannot process donation as a user with the email address: " + donationRecord.projectName() + " does not exist.",
+                        "Cannot process donation as a project with the name : " + donationRecord.projectName() + " does not exist.",
                         HttpStatus.NOT_FOUND
                 ));
 
@@ -94,6 +95,22 @@ public class DonationServiceImpl implements DonationService {
         logDonation.accept(donation);
 
         Donation saved = donationRepository.save(donation);
+
+        List<DonationDto> donorsDonations = stone.getDonationIds();
+        if(donorsDonations == null){
+            donorsDonations = new ArrayList<>();
+        }
+        donorsDonations.add(donationToDto.apply(saved));
+        stone.setDonationIds(donorsDonations);
+        stoneRepository.save(stone);
+
+        List<DonationDto> projectsDonations = project.getDonationIds();
+        if(projectsDonations == null){
+            projectsDonations = new ArrayList<>();
+        }
+        projectsDonations.add(donationToDto.apply(saved));
+        project.setDonationIds(projectsDonations);
+        projectRepository.save(project);
 
         return donationToDto.apply(saved);
     }

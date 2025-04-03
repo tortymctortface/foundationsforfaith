@@ -1,0 +1,5 @@
+Tuarascáil Tionscadail: Grace Chapel
+Uimhir Iomlán na nDeontóirí: 12
+Iomlán na nDeontas: ?1,960
+Barr-Dheontóirí: [yusufjohnson@example.com: €250.0, laurasmith@example.com: €250.0, masonjones@example.com: €200.0, juliajones@example.com: €200.0, dianasmith@example.com: €200.0]
+Fad Ama: N/A

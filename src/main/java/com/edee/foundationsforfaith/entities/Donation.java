@@ -1,5 +1,6 @@
 package com.edee.foundationsforfaith.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,10 +33,10 @@ public class Donation {
     @Field("donation_creation_date")
     private LocalDate donationCreationDate = LocalDate.now();
 
-    @Field("project_id")
+    @JsonIgnore
     private Project projectId;
 
-    @Field("stone_id")
+    @JsonIgnore
     private Stone stoneId;
 
 }

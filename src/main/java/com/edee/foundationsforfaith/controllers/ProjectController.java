@@ -13,6 +13,7 @@ import com.edee.foundationsforfaith.exceptions.UnableToInsertException;
 import com.edee.foundationsforfaith.repositories.ProjectRepository;
 import com.edee.foundationsforfaith.services.ProjectService;
 import com.edee.foundationsforfaith.services.ProjectUpdateService;
+import com.edee.foundationsforfaith.utils.ReportUtils;
 import com.edee.foundationsforfaith.utils.StatisticUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
@@ -23,7 +24,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @RestController
@@ -72,6 +76,20 @@ public class ProjectController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Duplicate project name used. Error: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/projects/report-localized")
+    public ResponseEntity<String> generateLocalizedProjectReport(
+            @RequestParam String name,
+            @RequestParam(defaultValue = "en") String lang
+    ) throws IOException {
+        Project project = projectRepository.findProjectByProjectName(name)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+                        Locale locale = Locale.forLanguageTag(lang);
+        Path file = ReportUtils.writeLocalizedProjectReport(project, locale);
+
+        return ResponseEntity.ok("Localized report written to: " + file.toAbsolutePath());
     }
 
 

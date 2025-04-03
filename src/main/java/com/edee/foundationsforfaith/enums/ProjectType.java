@@ -2,8 +2,7 @@ package com.edee.foundationsforfaith.enums;
 
 public enum ProjectType {
 
-    SCHOOL,
-    HOUSE,
-    CHURCH,
+    NEW_BUILD,
+    RENOVATION,
     UNKNOWN
 }
