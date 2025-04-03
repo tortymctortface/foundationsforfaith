@@ -32,7 +32,7 @@ public final class RenovationServiceImpl extends ProjectServiceImpl implements P
                 EnumUtils.getProjectType(projectCreationDto.getProjectType()),
                 projectCreationDto.getProjectStatus(),
                 projectCreationDto.getAmountOfFundingRequired() == null ? 0 : projectCreationDto.getAmountOfFundingRequired(),
-                projectCreationDto.getBuildingAgeInYears(),
+                projectCreationDto.getBuildingAgeInYears() == null ? 0 : projectCreationDto.getBuildingAgeInYears(),
                 projectCreationDto.getPreviouslyCompletedProject());
         Project savedProject = projectRepository.insert(project);
 

@@ -34,10 +34,10 @@ public class Stone {
     private Boolean sendUpdatesToDonor;
 
     @Field("project_ids")
-    private List<String> projectIds;
+    private List<Project> projectIds;
 
     @Field("donation_ids")
-    private List<String> donationIds;
+    private List<Donation> donationIds;
 
     @Field("stone_type")
     private StoneType stoneType;

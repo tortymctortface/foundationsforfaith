@@ -43,9 +43,10 @@ public class StoneServiceImpl implements StoneService {
                 stone.setEmail(Jsoup.clean(stoneCreationDto.getEmailAddress(), Safelist.basic()));
                 stone.setDonorName(Jsoup.clean(stoneCreationDto.getDonorName(), Safelist.basic()));
                 stone.setSendUpdatesToDonor(stoneCreationDto.getSendUpdatesToDonor());
-                List<String> stonesFirstProject = new ArrayList<>();
-                stonesFirstProject.add(project.get().getProjectId().toString());
+                List<Project> stonesFirstProject = new ArrayList<>();
+                stonesFirstProject.add(project.get());
                 stone.setProjectIds(stonesFirstProject);
+                stone.setStoneType(stoneCreationDto.getStoneType());
                 Stone savedStone = stoneRepository.insert(stone);
 
                 mongoTemplate.update(Project.class)
