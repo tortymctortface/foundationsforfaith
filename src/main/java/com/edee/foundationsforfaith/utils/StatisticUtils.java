@@ -91,7 +91,7 @@ public class StatisticUtils {
 
     private static void computeDonationSummary(List<Project> projects, ProjectStatsDto dto) {
         Optional<Float> sum = projects.stream()
-                .filter(p -> p.getDonationIds() != null) 
+                .filter(p -> p.getDonationIds() != null)
                 .flatMap(p -> p.getDonationIds().stream())
                 .map(DonationDto::getDonationAmount)
                 .reduce(Float::sum);
@@ -194,6 +194,7 @@ public class StatisticUtils {
 
     public static List<ProjectDonationTotalDto> sortProjectsByDonation(List<Project> projects) {
         return projects.stream()
+                .filter(p -> p.getDonationIds() != null)
                 .sorted(Comparator.comparingDouble((Project project) ->
                         project.getDonationIds().stream()
                                 .map(DonationDto::getDonationAmount)
