@@ -91,7 +91,7 @@ public class StatisticUtils {
 
     private static void computeDonationSummary(List<Project> projects, ProjectStatsDto dto) {
         Optional<Float> sum = projects.stream()
-                .filter(p -> p.getDonationIds() != null) // 🔐 null check to prevent NPE
+                .filter(p -> p.getDonationIds() != null) 
                 .flatMap(p -> p.getDonationIds().stream())
                 .map(DonationDto::getDonationAmount)
                 .reduce(Float::sum);
@@ -99,21 +99,21 @@ public class StatisticUtils {
         dto.setTotalDonations(sum.orElse(null)); // cleaner than isEmpty()/get()
 
         dto.setMinDonation(projects.stream()
-                .filter(p -> p.getDonationIds() != null) // 🔐 null check to prevent NPE
+                .filter(p -> p.getDonationIds() != null)
                 .flatMap(p -> p.getDonationIds().stream())
                 .map(DonationDto::getDonationAmount)
                 .min(Float::compareTo)
                 .orElse(null));
 
         dto.setMaxDonation(projects.stream()
-                .filter(p -> p.getDonationIds() != null) // 🔐 null check to prevent NPE
+                .filter(p -> p.getDonationIds() != null)
                 .flatMap(p -> p.getDonationIds().stream())
                 .map(DonationDto::getDonationAmount)
                 .min(Float::compareTo)
                 .orElse(null));
 
         Map<Boolean, List<DonationDto>> partitioned = projects.stream()
-                .filter(p -> p.getDonationIds() != null) // 🔐 null check to prevent NPE
+                .filter(p -> p.getDonationIds() != null)
                 .flatMap(p -> p.getDonationIds().stream())
                 .collect(Collectors.partitioningBy(d -> d.getDonationAmount() >= 500.0f));
 
@@ -123,7 +123,7 @@ public class StatisticUtils {
 
     private static void computeDonorBreakdown(List<Project> projects, ProjectStatsDto dto) {
         dto.setTopDonors(projects.stream()
-                .filter(p -> p.getDonationIds() != null) // 🔐 null check to prevent NPE
+                .filter(p -> p.getDonationIds() != null)
                 .flatMap(p -> p.getDonationIds().stream())
                 .filter(p -> p.getStoneEmail() != null)
                 .sorted((d1, d2) -> d2.getDonationAmount().compareTo(d1.getDonationAmount()))
@@ -133,7 +133,7 @@ public class StatisticUtils {
 
         dto.setTotalByDonor(
             projects.stream()
-                    .filter(p -> p.getDonationIds() != null) // 🔐 null check to prevent NPE
+                    .filter(p -> p.getDonationIds() != null)
                     .flatMap(p -> p.getDonationIds().stream())
                     .filter(d -> d.getStoneEmail() != null)
                     .collect(Collectors.toMap(
@@ -155,7 +155,7 @@ public class StatisticUtils {
 
         dto.setDonationsByProject(
                 projects.stream()
-                        .filter(p -> p.getDonationIds() != null) // 🔐 null check to prevent NPE
+                        .filter(p -> p.getDonationIds() != null)
                         .collect(Collectors.toMap(
                                 Project::getProjectName,
                                 p -> p.getDonationIds().stream()
