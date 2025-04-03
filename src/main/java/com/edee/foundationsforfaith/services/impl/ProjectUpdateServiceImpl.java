@@ -27,6 +27,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -73,8 +74,13 @@ public class ProjectUpdateServiceImpl implements ProjectUpdateService {
         String description;
         switch (action) {
             case StartProject s -> {
-                project.setProjectStatus(ProgressStatus.BUILD_IN_PROGRESS);
-                description = "The build of  "+project.getProjectName() + " is in progress. Date: " + LocalDateTime.now();
+                if (!ProgressStatus.BUILD_IN_PROGRESS.equals(project.getProjectStatus())) {
+                    project.setProjectStatus(ProgressStatus.BUILD_IN_PROGRESS);
+                    project.setProjectBuildStartDate(LocalDate.now());
+                    description = "The build of  "+project.getProjectName() + " was started and is now in progress. Date: " + LocalDateTime.now();
+                } else {
+                    throw new IllegalStateException("Project has already been started and is in progress.");
+                }
             }
             case PauseProject p -> {
                 if (!ProgressStatus.BUILD_IN_PROGRESS.equals(project.getProjectStatus())) {

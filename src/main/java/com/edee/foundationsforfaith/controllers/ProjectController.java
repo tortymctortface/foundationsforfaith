@@ -55,8 +55,8 @@ public class ProjectController {
         return new ResponseEntity<List<Project>>(projectRepository.findAll(), HttpStatus.OK);
     }
 
-    @GetMapping("/project/{name}")
-    public ResponseEntity<Optional<Project>> projectById(@PathVariable String projectName){
+    @GetMapping("/project/name/")
+    public ResponseEntity<Optional<Project>> projectById(@RequestParam String projectName){
         String safeProjectName = Jsoup.clean(projectName, Safelist.basic());
         return new ResponseEntity<Optional<Project>>(projectRepository.findProjectByProjectName(safeProjectName), HttpStatus.OK);
     }
