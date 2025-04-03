@@ -6,63 +6,16 @@ import com.edee.foundationsforfaith.entities.Project;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.*;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class ReportUtils {
-
-    public static Path writeSingleProjectReport(Project project) throws IOException {
-        String safeProjectName = project.getProjectName().replaceAll("[^a-zA-Z0-9\\-_]", "_");
-        Path projectDir = Paths.get("reports", safeProjectName);
-        if (Files.notExists(projectDir)) {
-            Files.createDirectories(projectDir);
-        }
-
-        Path file = projectDir.resolve("project-stats.txt");
-
-        long totalStones = project.getStoneIds().size();
-
-        Float totalDonations = project.getDonationIds().stream()
-                .map(DonationDto::getDonationAmount)
-                .reduce(0.0f, Float::sum);
-
-        List<String> topDonors = project.getDonationIds().stream()
-                .filter(d -> d.getStoneEmail() != null)
-                .sorted((d1, d2) -> d2.getDonationAmount().compareTo(d1.getDonationAmount()))
-                .limit(5)
-                .map(d -> d.getStoneEmail() + ": €" + d.getDonationAmount()).toList();
-
-        String duration = (project.getProjectCreatedDate() != null && project.getProjectBuildStartDate() != null)
-                ? formatPeriod(project.getProjectCreatedDate(), project.getProjectBuildStartDate())
-                : "N/A";
-
-        List<String> reportLines = List.of(
-                "=== Project Report: " + project.getProjectName() + " ===",
-                "Total Stones: " + totalStones,
-                "Total Donations: $" + totalDonations,
-                "Top Donors: " + topDonors,
-                "Duration: " + duration
-        );
-
-        // Only write if content has changed
-        if (Files.exists(file)) {
-            List<String> existing = Files.readAllLines(file);
-            if (existing.equals(reportLines)) {
-                log.info("No changes for project '{}', skipping write.", project.getProjectName());
-                return file;
-            }
-        }
-
-        Files.write(file, reportLines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        log.info("Project report written: {}", file.toAbsolutePath());
-
-        return file;
-    }
 
     public static Path writeLocalizedProjectReport(Project project, Locale locale) throws IOException {
         String safeProjectName = project.getProjectName().replaceAll("[^a-zA-Z0-9\\-_]", "_");
@@ -92,7 +45,7 @@ public class ReportUtils {
     public static List<String> buildLocalizedReport(Project project, Locale locale) {
         long donorCount = project.getDonationIds().stream()
                 .filter(d -> d.getStoneEmail() != null)
-                .map(d -> d.getStoneEmail())
+                .map(DonationDto::getStoneEmail)
                 .distinct()
                 .count();
 
@@ -100,12 +53,17 @@ public class ReportUtils {
                 .map(DonationDto::getDonationAmount)
                 .reduce(0.0f, Float::sum);
 
-        List<String> topDonors = project.getDonationIds().stream()
-                .filter(d -> d.getStoneEmail() != null)
-                .sorted(Comparator.comparing(DonationDto::getDonationAmount).reversed())
-                .limit(5)
-                .map(d -> d.getStoneEmail() + ": €" + d.getDonationAmount())
-                .toList();
+        SequencedSet<String> topDonors = new LinkedHashSet<>(
+                project.getDonationIds().stream()
+                        .filter(d -> d.getStoneEmail() != null)
+                        .sorted(Comparator.comparing(DonationDto::getDonationAmount).reversed())
+                        .limit(5)
+                        .map(d -> d.getStoneEmail() + ": €" + d.getDonationAmount())
+                        .toList()
+        );
+
+        // Example use of 'var _' (Java 22): silently looping for logging/testing without using the value
+        topDonors.forEach(_ -> log.debug("Donor processed"));
 
         String duration = (project.getProjectCreatedDate() != null && project.getProjectBuildStartDate() != null)
                 ? formatPeriod(project.getProjectCreatedDate(), project.getProjectBuildStartDate())
@@ -120,11 +78,8 @@ public class ReportUtils {
         );
     }
 
-
     private static String formatPeriod(LocalDate start, LocalDate end) {
         Period period = Period.between(start, end);
         return String.format("%d months, %d days", period.getMonths(), period.getDays());
     }
 }
-
-
