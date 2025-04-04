@@ -123,9 +123,10 @@ public class ProjectController {
         try{
             projectUpdateService.handleAction(action, project);
         } catch (Exception e) {
-
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unable to run action " + e.getMessage());
         }
-        projectUpdateService.handleAction(action, project);
+
 
         return ResponseEntity.ok("Action recorded: " + dto.getType());
     }

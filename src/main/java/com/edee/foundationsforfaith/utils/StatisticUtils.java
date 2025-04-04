@@ -94,7 +94,7 @@ public class StatisticUtils {
                 .map(DonationDto::getDonationAmount)
                 .reduce(Float::sum);
 
-        dto.setTotalDonations(sum.orElse(null)); // cleaner than isEmpty()/get()
+        dto.setTotalDonations(sum.orElse(null));
 
         dto.setMinDonation(projects.stream()
                 .filter(p -> p.getDonationIds() != null)
@@ -145,7 +145,7 @@ public class StatisticUtils {
 
     private static void computeProjectStats(List<Project> projects, ProjectStatsDto dto) {
         dto.setDonationCountByProject(projects.stream()
-                .filter(p -> p.getDonationIds() != null) // 🔐 null check to prevent NPE
+                .filter(p -> p.getDonationIds() != null)
                 .collect(Collectors.toMap(
                         Project::getProjectName,
                         p -> p.getDonationIds().size()
